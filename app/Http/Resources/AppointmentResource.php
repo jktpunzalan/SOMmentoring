@@ -9,6 +9,8 @@ class AppointmentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $durationMinutes = (int) ($this->duration_minutes ?? 0);
+
         return [
             'id' => $this->id,
             'ulid' => $this->ulid,
@@ -19,8 +21,8 @@ class AppointmentResource extends JsonResource
             'description' => $this->description,
             'venue' => $this->venue,
             'scheduled_at' => $this->scheduled_at?->toISOString(),
-            'duration_minutes' => $this->duration_minutes,
-            'end_time' => $this->scheduled_at?->copy()->addMinutes($this->duration_minutes)->toISOString(),
+            'duration_minutes' => $durationMinutes,
+            'end_time' => $this->scheduled_at?->copy()->addMinutes($durationMinutes)->toISOString(),
             'is_group' => $this->is_group,
             'max_participants' => $this->max_participants,
             'status' => $this->status,
