@@ -1,0 +1,10 @@
+# Place this .htaccess in Hostinger's public_html root
+# This redirects all requests to the Laravel public/ directory
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirect all requests to public/
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L,QSA]
+</IfModule>

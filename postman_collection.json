@@ -1,0 +1,256 @@
+{
+    "info": {
+        "name": "Mentoring System API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        { "key": "base_url", "value": "http://localhost:8000/api/v1" },
+        { "key": "csrf_url", "value": "http://localhost:8000/sanctum/csrf-cookie" }
+    ],
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Get CSRF Cookie",
+                    "request": { "method": "GET", "url": "{{csrf_url}}" }
+                },
+                {
+                    "name": "Register Mentee",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/auth/register",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"Test Mentee\",\n  \"email\": \"mentee@test.com\",\n  \"password\": \"password\",\n  \"password_confirmation\": \"password\",\n  \"mentor_id\": 2,\n  \"student_id\": \"STU001\",\n  \"course\": \"BS Computer Science\",\n  \"year_level\": \"3rd\",\n  \"department\": \"Computer Science\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/auth/login",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"mentor@mentoring.test\",\n  \"password\": \"password\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Current User",
+                    "request": { "method": "GET", "url": "{{base_url}}/auth/me", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Logout",
+                    "request": { "method": "POST", "url": "{{base_url}}/auth/logout", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        },
+        {
+            "name": "Dashboard",
+            "item": [
+                {
+                    "name": "Get Dashboard",
+                    "request": { "method": "GET", "url": "{{base_url}}/dashboard", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        },
+        {
+            "name": "Mentors (Public)",
+            "item": [
+                {
+                    "name": "List Mentors",
+                    "request": { "method": "GET", "url": "{{base_url}}/mentors", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        },
+        {
+            "name": "Mentees",
+            "item": [
+                {
+                    "name": "List Mentees",
+                    "request": { "method": "GET", "url": "{{base_url}}/mentees", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "List Pending Mentees",
+                    "request": { "method": "GET", "url": "{{base_url}}/mentees/pending", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Approve Mentee",
+                    "request": { "method": "POST", "url": "{{base_url}}/mentees/3/approve", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Reject Mentee",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/mentees/3/reject",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"rejection_reason\": \"Not eligible at this time\"\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Appointments",
+            "item": [
+                {
+                    "name": "List Appointments",
+                    "request": { "method": "GET", "url": "{{base_url}}/appointments", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Create Appointment",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/appointments",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Weekly Check-in\",\n  \"description\": \"Regular progress review\",\n  \"venue\": \"Room 201\",\n  \"scheduled_at\": \"2026-03-15 10:00:00\",\n  \"duration_minutes\": 60,\n  \"is_group\": false,\n  \"mentee_ids\": [3]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Get Appointment",
+                    "request": { "method": "GET", "url": "{{base_url}}/appointments/:ulid", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Approve Appointment",
+                    "request": { "method": "POST", "url": "{{base_url}}/appointments/:ulid/approve", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Reject Appointment",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/appointments/:ulid/reject",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"rejection_reason\": \"Schedule conflict\"\n}" }
+                    }
+                },
+                {
+                    "name": "Cancel Appointment",
+                    "request": { "method": "POST", "url": "{{base_url}}/appointments/:ulid/cancel", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Calendar Data",
+                    "request": { "method": "GET", "url": "{{base_url}}/appointments/calendar?start=2026-03-01&end=2026-03-31", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        },
+        {
+            "name": "Sessions",
+            "item": [
+                {
+                    "name": "List Sessions",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Create Session",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/sessions",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"title\": \"First Mentoring Session\",\n  \"mentee_ids\": [3]\n}" }
+                    }
+                },
+                {
+                    "name": "Get Session",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions/:ulid", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "End Session",
+                    "request": { "method": "POST", "url": "{{base_url}}/sessions/:ulid/end", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Get Session Notes",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions/:ulid/notes", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Save Session Notes",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/sessions/:ulid/notes",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"agenda\": \"Discuss progress\",\n  \"key_discussion_points\": \"Covered chapters 1-3\",\n  \"action_items\": \"Review chapter 4\",\n  \"free_text_notes\": \"Good progress overall\"\n}" }
+                    }
+                },
+                {
+                    "name": "Upload Session Photo",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/sessions/:ulid/photos",
+                        "header": [{ "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "formdata", "formdata": [{ "key": "photo", "type": "file", "src": "" }] }
+                    }
+                },
+                {
+                    "name": "Get Session Photos",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions/:ulid/photos", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Download Session Photo",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions/:ulid/photos/:id/download" }
+                },
+                {
+                    "name": "Get Participants",
+                    "request": { "method": "GET", "url": "{{base_url}}/sessions/:ulid/participants", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Update Participants",
+                    "request": {
+                        "method": "POST",
+                        "url": "{{base_url}}/sessions/:ulid/participants",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"mentee_ids\": [3]\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Notifications",
+            "item": [
+                {
+                    "name": "List Notifications",
+                    "request": { "method": "GET", "url": "{{base_url}}/notifications", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Mark Notification Read",
+                    "request": { "method": "POST", "url": "{{base_url}}/notifications/1/read", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Mark All Read",
+                    "request": { "method": "POST", "url": "{{base_url}}/notifications/mark-read", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        },
+        {
+            "name": "Profile",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": { "method": "GET", "url": "{{base_url}}/profile", "header": [{ "key": "Accept", "value": "application/json" }] }
+                },
+                {
+                    "name": "Update Profile",
+                    "request": {
+                        "method": "PUT",
+                        "url": "{{base_url}}/profile",
+                        "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Accept", "value": "application/json" }],
+                        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Updated Name\",\n  \"phone\": \"09171234567\"\n}" }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "Admin",
+            "item": [
+                {
+                    "name": "List Users",
+                    "request": { "method": "GET", "url": "{{base_url}}/users", "header": [{ "key": "Accept", "value": "application/json" }] }
+                }
+            ]
+        }
+    ]
+}
