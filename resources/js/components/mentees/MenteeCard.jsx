@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, Mail, BookOpen, GraduationCap } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import AppointmentStatusBadge from '@/components/appointments/AppointmentStatusBadge';
 
 const MenteeCard = ({ mentorMentee, actions }) => {
@@ -25,18 +25,6 @@ const MenteeCard = ({ mentorMentee, actions }) => {
                     <Mail className="w-4 h-4 flex-shrink-0" />
                     <span className="truncate">{mentee.email}</span>
                 </div>
-                {mentee.course && (
-                    <div className="flex items-center gap-2">
-                        <GraduationCap className="w-4 h-4 flex-shrink-0" />
-                        <span>{mentee.course} - Year {mentee.year_level}</span>
-                    </div>
-                )}
-                {mentee.department && (
-                    <div className="flex items-center gap-2">
-                        <BookOpen className="w-4 h-4 flex-shrink-0" />
-                        <span>{mentee.department}</span>
-                    </div>
-                )}
             </div>
             {actions && <div className="flex gap-2 pt-2 border-t border-gray-100">{actions}</div>}
         </div>

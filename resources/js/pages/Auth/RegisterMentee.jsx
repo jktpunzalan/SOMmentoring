@@ -12,7 +12,7 @@ const RegisterMentee = () => {
     const [mentors, setMentors] = useState([]);
     const [form, setForm] = useState({
         name: '', email: '', password: '', password_confirmation: '',
-        mentor_id: '', student_id: '', course: '', year_level: '', department: '', phone: '',
+        mentor_id: '', student_id: '', year_level: '', phone: '',
     });
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState('');
@@ -80,7 +80,7 @@ const RegisterMentee = () => {
                             <select value={form.mentor_id} onChange={(e) => handleChange('mentor_id', e.target.value)} className={inputClass} required>
                                 <option value="">Choose your mentor</option>
                                 {mentors.map((m) => (
-                                    <option key={m.id} value={m.id}>{m.name} {m.department ? `- ${m.department}` : ''}</option>
+                                    <option key={m.id} value={m.id}>{m.name}</option>
                                 ))}
                             </select>
                             <InlineFieldError error={errors.mentor_id} />
@@ -102,14 +102,6 @@ const RegisterMentee = () => {
                                     <option value="5th">5th Year</option>
                                 </select>
                             </div>
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
-                            <input type="text" value={form.course} onChange={(e) => handleChange('course', e.target.value)} className={inputClass} placeholder="e.g. BS Computer Science" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                            <input type="text" value={form.department} onChange={(e) => handleChange('department', e.target.value)} className={inputClass} />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>

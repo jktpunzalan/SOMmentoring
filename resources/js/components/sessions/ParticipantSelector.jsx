@@ -33,7 +33,7 @@ const ParticipantSelector = ({ selectedIds = [], onChange, maxParticipants = 15 
                             </div>
                             <div className="flex-1 min-w-0">
                                 <p className="font-medium truncate">{mentee.name}</p>
-                                <p className="text-xs text-gray-500">{mentee.student_id} - {mentee.course}</p>
+                                <p className="text-xs text-gray-500">{mentee.student_id}</p>
                             </div>
                         </button>
                     );

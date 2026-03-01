@@ -33,9 +33,7 @@ class UserController extends Controller
             'password' => ['required', 'string', 'min:8'],
             'role' => ['required', Rule::in(['super_admin', 'mentor', 'mentee'])],
             'student_id' => ['nullable', 'string', 'max:100'],
-            'course' => ['nullable', 'string', 'max:255'],
             'year_level' => ['nullable', 'string', 'max:50'],
-            'department' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'profile_complete' => ['nullable', 'boolean'],
         ]);
@@ -55,9 +53,7 @@ class UserController extends Controller
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'role' => ['required', Rule::in(['super_admin', 'mentor', 'mentee'])],
             'student_id' => ['nullable', 'string', 'max:100'],
-            'course' => ['nullable', 'string', 'max:255'],
             'year_level' => ['nullable', 'string', 'max:50'],
-            'department' => ['nullable', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
             'profile_complete' => ['nullable', 'boolean'],
         ]);

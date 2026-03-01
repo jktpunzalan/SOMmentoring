@@ -8,8 +8,8 @@ import { Save, User } from 'lucide-react';
 const ProfilePage = () => {
     const { user, fetchUser } = useAuth();
     const [form, setForm] = useState({
-        name: '', email: '', phone: '', department: '',
-        course: '', year_level: '', student_id: '',
+        name: '', email: '', phone: '',
+        year_level: '', student_id: '',
     });
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState('');
@@ -23,8 +23,6 @@ const ProfilePage = () => {
                 name: user.name || '',
                 email: user.email || '',
                 phone: user.phone || '',
-                department: user.department || '',
-                course: user.course || '',
                 year_level: user.year_level || '',
                 student_id: user.student_id || '',
             });
@@ -102,27 +100,17 @@ const ProfilePage = () => {
                         <input type="tel" value={form.phone} onChange={(e) => handleChange('phone', e.target.value)} className={inputClass} />
                         <InlineFieldError error={errors.phone} />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                        <input type="text" value={form.department} onChange={(e) => handleChange('department', e.target.value)} className={inputClass} />
-                    </div>
                     {user?.role === 'mentee' && (
-                        <>
-                            <div className="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
-                                    <input type="text" value={form.student_id} onChange={(e) => handleChange('student_id', e.target.value)} className={inputClass} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
-                                    <input type="text" value={form.year_level} onChange={(e) => handleChange('year_level', e.target.value)} className={inputClass} />
-                                </div>
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                                <input type="text" value={form.student_id} onChange={(e) => handleChange('student_id', e.target.value)} className={inputClass} />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Course</label>
-                                <input type="text" value={form.course} onChange={(e) => handleChange('course', e.target.value)} className={inputClass} />
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Year Level</label>
+                                <input type="text" value={form.year_level} onChange={(e) => handleChange('year_level', e.target.value)} className={inputClass} />
                             </div>
-                        </>
+                        </div>
                     )}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Avatar</label>

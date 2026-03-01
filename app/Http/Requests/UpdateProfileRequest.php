@@ -18,8 +18,6 @@ class UpdateProfileRequest extends FormRequest
             'name' => ['sometimes', 'required', 'string', 'max:255'],
             'email' => ['sometimes', 'required', 'email', 'max:255', Rule::unique('users')->ignore($this->user()->id)],
             'phone' => ['nullable', 'string', 'max:50'],
-            'department' => ['nullable', 'string', 'max:255'],
-            'course' => ['nullable', 'string', 'max:255'],
             'year_level' => ['nullable', 'string', 'max:50'],
             'student_id' => ['nullable', 'string', 'max:100'],
             'avatar' => ['nullable', 'file', 'image', 'max:2048'],

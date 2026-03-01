@@ -27,9 +27,7 @@ class AuthService
                 'password' => $data['password'],
                 'role' => 'mentee',
                 'student_id' => $data['student_id'] ?? null,
-                'course' => $data['course'] ?? null,
                 'year_level' => $data['year_level'] ?? null,
-                'department' => $data['department'] ?? null,
                 'phone' => $data['phone'] ?? null,
             ]);
 

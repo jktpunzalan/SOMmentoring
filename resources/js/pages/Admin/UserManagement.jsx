@@ -18,7 +18,7 @@ const UserManagement = () => {
 
     const [selectedUser, setSelectedUser] = useState(null);
 
-    const emptyForm = { name: '', email: '', role: 'mentee', department: '', phone: '', student_id: '', course: '', year_level: '', profile_complete: false, password: '' };
+    const emptyForm = { name: '', email: '', role: 'mentee', phone: '', student_id: '', year_level: '', profile_complete: false, password: '' };
     const [form, setForm] = useState(emptyForm);
     const [resetPassword, setResetPassword] = useState('');
     const { data, isLoading } = useQuery({
@@ -82,10 +82,8 @@ const UserManagement = () => {
             name: u.name || '',
             email: u.email || '',
             role: u.role || 'mentee',
-            department: u.department || '',
             phone: u.phone || '',
             student_id: u.student_id || '',
-            course: u.course || '',
             year_level: u.year_level || '',
             profile_complete: !!u.profile_complete,
             password: '',
@@ -124,10 +122,8 @@ const UserManagement = () => {
             email: form.email,
             password: form.password,
             role: form.role,
-            department: form.department || null,
             phone: form.phone || null,
             student_id: form.student_id || null,
-            course: form.course || null,
             year_level: form.year_level || null,
             profile_complete: !!form.profile_complete,
         });
@@ -143,10 +139,8 @@ const UserManagement = () => {
                 name: form.name,
                 email: form.email,
                 role: form.role,
-                department: form.department || null,
                 phone: form.phone || null,
                 student_id: form.student_id || null,
-                course: form.course || null,
                 year_level: form.year_level || null,
                 profile_complete: !!form.profile_complete,
             },
@@ -227,7 +221,6 @@ const UserManagement = () => {
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">Name</th>
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">Email</th>
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">Role</th>
-                                    <th className="text-left px-4 py-3 font-medium text-gray-700">Department</th>
                                     <th className="text-left px-4 py-3 font-medium text-gray-700">Joined</th>
                                     <th className="text-right px-4 py-3 font-medium text-gray-700">Actions</th>
                                 </tr>
@@ -238,7 +231,6 @@ const UserManagement = () => {
                                         <td className="px-4 py-3 font-medium text-gray-900">{u.name}</td>
                                         <td className="px-4 py-3 text-gray-600">{u.email}</td>
                                         <td className="px-4 py-3">{roleBadge(u.role)}</td>
-                                        <td className="px-4 py-3 text-gray-600">{u.department || '—'}</td>
                                         <td className="px-4 py-3 text-gray-500">{u.created_at ? new Date(u.created_at).toLocaleDateString() : '—'}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center justify-end gap-2">
@@ -319,8 +311,8 @@ const UserManagement = () => {
                                         </select>
                                     </div>
                                     <div>
-                                        <label className="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                                        <input value={form.department} onChange={(e) => setForm(prev => ({ ...prev, department: e.target.value }))} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[48px]" />
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                                        <input value={form.phone} onChange={(e) => setForm(prev => ({ ...prev, phone: e.target.value }))} className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[48px]" />
                                     </div>
                                 </div>
 
