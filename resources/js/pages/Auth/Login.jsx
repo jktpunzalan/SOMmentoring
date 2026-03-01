@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import InlineFieldError from '@/components/shared/InlineFieldError';
 import ErrorBanner from '@/components/shared/ErrorBanner';
@@ -7,6 +7,7 @@ import { LogIn } from 'lucide-react';
 
 const Login = () => {
     const { login } = useAuth();
+    const navigate = useNavigate();
     const [form, setForm] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
     const [generalError, setGeneralError] = useState('');
@@ -19,6 +20,7 @@ const Login = () => {
         setGeneralError('');
         try {
             await login(form);
+            navigate('/dashboard');
         } catch (err) {
             if (err.response?.status === 422) {
                 setErrors(err.response.data.errors || {});
