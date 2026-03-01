@@ -11,10 +11,18 @@ const api = axios.create({
     withXSRFToken: true,
 });
 
-const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
-if (csrfToken) {
-    api.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
-}
+api.interceptors.request.use((config) => {
+    const hasXsrfCookie = typeof document !== 'undefined' && document.cookie?.includes('XSRF-TOKEN=');
+    if (!hasXsrfCookie) {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            config.headers = config.headers || {};
+            config.headers['X-CSRF-TOKEN'] = csrfToken;
+        }
+    }
+
+    return config;
+});
 
 api.interceptors.response.use(
     (response) => response,

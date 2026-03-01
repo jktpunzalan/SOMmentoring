@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
@@ -9,6 +9,16 @@ const AppShell = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const { user, logout, isMentor, isSuperAdmin } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const handleLogout = async () => {
+        try {
+            await logout();
+        } finally {
+            setSidebarOpen(false);
+            navigate('/login', { replace: true });
+        }
+    };
 
     const getTitle = () => {
         const path = location.pathname;
@@ -58,7 +68,7 @@ const AppShell = () => {
                             ))}
                         </nav>
                         <div className="p-3 border-t">
-                            <button onClick={logout} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 min-h-[44px]">
+                            <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 min-h-[44px]">
                                 <LogOut className="w-5 h-5" />
                                 Sign Out
                             </button>
@@ -89,7 +99,7 @@ const AppShell = () => {
                             <p className="text-xs text-gray-500 capitalize">{user?.role?.replace('_', ' ')}</p>
                         </div>
                     </div>
-                    <button onClick={logout} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 min-h-[44px]">
+                    <button onClick={handleLogout} className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 min-h-[44px]">
                         <LogOut className="w-5 h-5" />
                         Sign Out
                     </button>
