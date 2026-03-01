@@ -25,7 +25,7 @@ const AppShell = () => {
         if (path.includes('/dashboard')) return 'Dashboard';
         if (path.includes('/mentees')) return 'Mentees';
         if (path.includes('/appointments/calendar')) return 'Calendar';
-        if (path.includes('/appointments/new')) return 'New Appointment';
+        if (path.includes('/appointments/new')) return 'Open Slot';
         if (path.includes('/appointments')) return 'Appointments';
         if (path.includes('/sessions') && path.includes('/active')) return 'Active Session';
         if (path.includes('/sessions')) return 'Sessions';

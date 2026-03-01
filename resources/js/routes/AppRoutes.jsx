@@ -59,7 +59,7 @@ const AppRoutes = () => {
                 <Route path="mentees/pending" element={<ProtectedRoute roles={['mentor', 'super_admin']}><MenteeApproval /></ProtectedRoute>} />
 
                 <Route path="appointments" element={<AppointmentList />} />
-                <Route path="appointments/new" element={<AppointmentForm />} />
+                <Route path="appointments/new" element={<ProtectedRoute roles={['mentor']}><AppointmentForm /></ProtectedRoute>} />
                 <Route path="appointments/calendar" element={<AppointmentCalendar />} />
                 <Route path="appointments/:ulid" element={<AppointmentDetail />} />
 

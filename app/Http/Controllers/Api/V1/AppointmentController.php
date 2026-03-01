@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreAppointmentRequest;
 use App\Http\Requests\UpdateAppointmentRequest;
-use App\Http\Resources\AppointmentCollection;
 use App\Http\Resources\AppointmentResource;
 use App\Services\AppointmentService;
 use Illuminate\Http\JsonResponse;
@@ -24,7 +23,7 @@ class AppointmentController extends Controller
     public function store(StoreAppointmentRequest $request): JsonResponse
     {
         $appointment = $this->service->create($request->validated(), $request->user());
-        return response()->json(['message' => 'Appointment created.', 'data' => new AppointmentResource($appointment)], 201);
+        return response()->json(['message' => 'Appointment slot created.', 'data' => new AppointmentResource($appointment)], 201);
     }
 
     public function show(string $ulid): JsonResponse
@@ -40,6 +39,40 @@ class AppointmentController extends Controller
         $this->authorize('update', $appointment);
         $updated = $this->service->update($ulid, $request->validated(), $request->user());
         return response()->json(['message' => 'Appointment updated.', 'data' => new AppointmentResource($updated)]);
+    }
+
+    public function available(Request $request): JsonResponse
+    {
+        $slots = $this->service->getAvailableSlots($request->user());
+        return response()->json(['data' => AppointmentResource::collection($slots)]);
+    }
+
+    public function enroll(Request $request, string $ulid): JsonResponse
+    {
+        $appointment = $this->service->enroll($ulid, $request->user());
+        return response()->json(['message' => 'Enrolled successfully.', 'data' => new AppointmentResource($appointment)]);
+    }
+
+    public function unenroll(Request $request, string $ulid): JsonResponse
+    {
+        $appointment = $this->service->unenroll($ulid, $request->user());
+        return response()->json(['message' => 'Withdrawn successfully.', 'data' => new AppointmentResource($appointment)]);
+    }
+
+    public function approveMentee(Request $request, string $ulid, int $menteeId): JsonResponse
+    {
+        $appointment = $this->service->show($ulid);
+        $this->authorize('update', $appointment);
+        $updated = $this->service->approveMentee($ulid, $menteeId);
+        return response()->json(['message' => 'Mentee approved.', 'data' => new AppointmentResource($updated)]);
+    }
+
+    public function rejectMentee(Request $request, string $ulid, int $menteeId): JsonResponse
+    {
+        $appointment = $this->service->show($ulid);
+        $this->authorize('update', $appointment);
+        $updated = $this->service->rejectMentee($ulid, $menteeId);
+        return response()->json(['message' => 'Mentee rejected.', 'data' => new AppointmentResource($updated)]);
     }
 
     public function approve(Request $request, string $ulid): JsonResponse

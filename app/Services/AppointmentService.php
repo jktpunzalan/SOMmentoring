@@ -43,42 +43,21 @@ class AppointmentService
 
     public function create(array $data, User $proposer): Appointment
     {
-        $mentorId = $proposer->isMentor() ? $proposer->id : $data['mentor_id'];
+        abort_if(!$proposer->isMentor() && !$proposer->isSuperAdmin(), 403, 'Only mentors can create appointment slots.');
 
-        if ($proposer->isMentee()) {
-            $record = $this->mentorMenteeRepository->findByMenteeId($proposer->id);
-            abort_if(!$record || !$record->isApproved(), 403, 'You must be an approved mentee.');
-            $mentorId = $record->mentor_id;
-        }
-
-        return DB::transaction(function () use ($data, $proposer, $mentorId) {
+        return DB::transaction(function () use ($data, $proposer) {
             $appointment = $this->appointmentRepository->create([
-                'mentor_id' => $mentorId,
+                'mentor_id' => $proposer->id,
                 'proposed_by_id' => $proposer->id,
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
                 'venue' => $data['venue'] ?? null,
                 'scheduled_at' => $data['scheduled_at'],
                 'duration_minutes' => $data['duration_minutes'] ?? 60,
-                'is_group' => $data['is_group'] ?? false,
-                'max_participants' => $data['max_participants'] ?? 15,
-                'status' => 'pending',
+                'is_group' => $data['is_group'] ?? true,
+                'max_participants' => $data['max_participants'] ?? 10,
+                'status' => 'open',
             ]);
-
-            $menteeIds = $data['mentee_ids'] ?? [];
-
-            if ($proposer->isMentee() && empty($menteeIds)) {
-                $menteeIds = [$proposer->id];
-            }
-
-            foreach ($menteeIds as $menteeId) {
-                $appointment->mentees()->create([
-                    'mentee_id' => $menteeId,
-                    'status' => 'invited',
-                ]);
-            }
-
-            $this->notificationService->notifyAppointmentProposed($appointment);
 
             return $appointment->load(['mentor', 'proposedBy', 'mentees.mentee']);
         });
@@ -88,23 +67,84 @@ class AppointmentService
     {
         $appointment = $this->show($ulid);
 
-        abort_if($appointment->status !== 'pending', 422, 'Only pending appointments can be edited.');
+        abort_if(!in_array($appointment->status, ['open', 'pending']), 422, 'Only open slots can be edited.');
 
         return DB::transaction(function () use ($appointment, $data) {
             $this->appointmentRepository->update($appointment, $data);
-
-            if (isset($data['mentee_ids'])) {
-                $appointment->mentees()->delete();
-                foreach ($data['mentee_ids'] as $menteeId) {
-                    $appointment->mentees()->create([
-                        'mentee_id' => $menteeId,
-                        'status' => 'invited',
-                    ]);
-                }
-            }
-
             return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee']);
         });
+    }
+
+    public function getAvailableSlots(User $user): Collection
+    {
+        abort_if(!$user->isMentee(), 403, 'Only mentees can browse available slots.');
+
+        $record = $this->mentorMenteeRepository->findByMenteeId($user->id);
+        abort_if(!$record || !$record->isApproved(), 403, 'You must be an approved mentee.');
+
+        return $this->appointmentRepository->getAvailableSlots($record->mentor_id, $user->id);
+    }
+
+    public function enroll(string $ulid, User $user): Appointment
+    {
+        abort_if(!$user->isMentee(), 403, 'Only mentees can enroll.');
+
+        $appointment = $this->show($ulid);
+        abort_if($appointment->status !== 'open', 422, 'This slot is not open for enrollment.');
+
+        $alreadyEnrolled = $appointment->mentees()->where('mentee_id', $user->id)->exists();
+        abort_if($alreadyEnrolled, 422, 'You are already enrolled in this slot.');
+
+        $currentCount = $appointment->mentees()->count();
+        abort_if($currentCount >= $appointment->max_participants, 422, 'This slot is full.');
+
+        $appointment->mentees()->create([
+            'mentee_id' => $user->id,
+            'status' => 'pending',
+        ]);
+
+        $this->notificationService->notifyAppointmentProposed($appointment);
+
+        return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee']);
+    }
+
+    public function unenroll(string $ulid, User $user): Appointment
+    {
+        $appointment = $this->show($ulid);
+
+        $pivot = $appointment->mentees()->where('mentee_id', $user->id)->first();
+        abort_if(!$pivot, 404, 'You are not enrolled in this slot.');
+        abort_if($pivot->status === 'approved', 422, 'Cannot withdraw after being approved. Contact your mentor.');
+
+        $pivot->delete();
+
+        return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee']);
+    }
+
+    public function approveMentee(string $ulid, int $menteeId): Appointment
+    {
+        $appointment = $this->show($ulid);
+
+        $pivot = $appointment->mentees()->where('mentee_id', $menteeId)->first();
+        abort_if(!$pivot, 404, 'Mentee not found in this appointment.');
+        abort_if($pivot->status !== 'pending', 422, 'Only pending enrollments can be approved.');
+
+        $pivot->update(['status' => 'approved']);
+
+        return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee']);
+    }
+
+    public function rejectMentee(string $ulid, int $menteeId): Appointment
+    {
+        $appointment = $this->show($ulid);
+
+        $pivot = $appointment->mentees()->where('mentee_id', $menteeId)->first();
+        abort_if(!$pivot, 404, 'Mentee not found in this appointment.');
+        abort_if($pivot->status !== 'pending', 422, 'Only pending enrollments can be rejected.');
+
+        $pivot->update(['status' => 'rejected']);
+
+        return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee']);
     }
 
     public function approve(string $ulid, User $approver): Appointment
@@ -116,7 +156,7 @@ class AppointmentService
         if ($this->appointmentRepository->hasOverlap(
             $appointment->mentor_id,
             $appointment->scheduled_at->toDateTimeString(),
-            $appointment->duration_minutes,
+            $appointment->duration_minutes ?? 60,
             $appointment->id
         )) {
             throw ValidationException::withMessages([
@@ -160,7 +200,7 @@ class AppointmentService
         $appointment = $this->show($ulid);
 
         abort_if(
-            !in_array($appointment->status, ['pending', 'approved']),
+            !in_array($appointment->status, ['pending', 'approved', 'open']),
             422,
             'This appointment cannot be cancelled.'
         );

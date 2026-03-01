@@ -1,12 +1,24 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 import { useCalendarData } from '@/hooks/useAppointments';
 import AppointmentStatusBadge from '@/components/appointments/AppointmentStatusBadge';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, Users } from 'lucide-react';
+
+const statusColor = {
+    open: 'bg-indigo-100 text-indigo-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    approved: 'bg-green-100 text-green-800',
+    cancelled: 'bg-gray-100 text-gray-600',
+    completed: 'bg-blue-100 text-blue-800',
+    ongoing: 'bg-emerald-100 text-emerald-800',
+    rejected: 'bg-red-100 text-red-800',
+};
 
 const AppointmentCalendar = () => {
     const navigate = useNavigate();
+    const { isMentor } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const year = currentDate.getFullYear();
@@ -59,9 +71,11 @@ const AppointmentCalendar = () => {
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>
-                <button onClick={() => navigate('/appointments/new')} className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 min-h-[44px]">
-                    <Plus className="w-4 h-4" /> New
-                </button>
+                {isMentor && (
+                    <button onClick={() => navigate('/appointments/new')} className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 min-h-[44px]">
+                        <Plus className="w-4 h-4" /> Open Slot
+                    </button>
+                )}
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -84,7 +98,7 @@ const AppointmentCalendar = () => {
                                 </div>
                                 <div className="space-y-0.5">
                                     {dayAppointments.slice(0, 2).map((a) => (
-                                        <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className={`w-full text-left px-1 py-0.5 rounded text-[10px] truncate ${a.status === 'approved' ? 'bg-green-100 text-green-800' : a.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-600'}`}>
+                                        <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className={`w-full text-left px-1 py-0.5 rounded text-[10px] truncate ${statusColor[a.status] || 'bg-gray-100 text-gray-600'}`}>
                                             {a.title}
                                         </button>
                                     ))}
@@ -100,16 +114,24 @@ const AppointmentCalendar = () => {
 
             {appointments.length > 0 && (
                 <div className="space-y-2">
-                    <h3 className="text-sm font-medium text-gray-700">This Month's Appointments</h3>
-                    {appointments.map((a) => (
-                        <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className="w-full text-left bg-white rounded-lg border border-gray-200 px-4 py-3 flex items-center justify-between hover:shadow-sm transition-shadow">
-                            <div>
-                                <p className="text-sm font-medium text-gray-900">{a.title}</p>
-                                <p className="text-xs text-gray-500">{new Date(a.scheduled_at).toLocaleString()}</p>
-                            </div>
-                            <AppointmentStatusBadge status={a.status} />
-                        </button>
-                    ))}
+                    <h3 className="text-sm font-medium text-gray-700">This Month</h3>
+                    {appointments.map((a) => {
+                        const date = new Date(a.scheduled_at);
+                        const enrolled = a.mentees?.length || 0;
+                        return (
+                            <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className="w-full text-left bg-white rounded-lg border border-gray-200 px-4 py-3 hover:shadow-sm transition-shadow">
+                                <div className="flex items-start justify-between gap-2 mb-1">
+                                    <p className="text-sm font-medium text-gray-900">{a.title}</p>
+                                    <AppointmentStatusBadge status={a.status} />
+                                </div>
+                                <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>
+                                    {a.venue && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{a.venue}</span>}
+                                    <span className="flex items-center gap-1"><Users className="w-3 h-3" />{enrolled}/{a.max_participants || '∞'}</span>
+                                </div>
+                            </button>
+                        );
+                    })}
                 </div>
             )}
         </div>

@@ -16,6 +16,7 @@ class AppointmentPolicy
     {
         if ($user->isSuperAdmin()) return true;
         if ($user->id === $appointment->mentor_id) return true;
+        if ($appointment->status === 'open') return true;
         if ($appointment->mentees()->where('mentee_id', $user->id)->exists()) return true;
         return false;
     }
@@ -28,8 +29,8 @@ class AppointmentPolicy
     public function update(User $user, Appointment $appointment): bool
     {
         if ($user->isSuperAdmin()) return true;
-        if ($appointment->status !== 'pending') return false;
-        return $user->id === $appointment->proposed_by_id;
+        if (!in_array($appointment->status, ['pending', 'open'])) return false;
+        return $user->id === $appointment->mentor_id || $user->id === $appointment->proposed_by_id;
     }
 
     public function approve(User $user, Appointment $appointment): bool

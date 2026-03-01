@@ -1,6 +1,7 @@
 import React from 'react';
 
 const statusConfig = {
+    open: { bg: 'bg-indigo-100', text: 'text-indigo-800', label: 'Open' },
     pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'Pending' },
     approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approved' },
     rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejected' },

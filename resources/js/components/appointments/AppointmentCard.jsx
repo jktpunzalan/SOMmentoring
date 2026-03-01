@@ -6,6 +6,7 @@ import AppointmentStatusBadge from './AppointmentStatusBadge';
 const AppointmentCard = ({ appointment }) => {
     const navigate = useNavigate();
     const date = new Date(appointment.scheduled_at);
+    const enrolled = appointment.mentees?.length || 0;
 
     return (
         <button onClick={() => navigate(`/appointments/${appointment.ulid}`)} className="w-full text-left bg-white rounded-xl border border-gray-200 p-4 hover:shadow-md transition-shadow">
@@ -20,7 +21,7 @@ const AppointmentCard = ({ appointment }) => {
                 </div>
                 <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 flex-shrink-0" />
-                    <span>{date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} ({appointment.duration_minutes}min)</span>
+                    <span>{date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })} ({appointment.duration_minutes || 60}min)</span>
                 </div>
                 {appointment.venue && (
                     <div className="flex items-center gap-2">
@@ -28,12 +29,10 @@ const AppointmentCard = ({ appointment }) => {
                         <span className="truncate">{appointment.venue}</span>
                     </div>
                 )}
-                {appointment.is_group && (
-                    <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 flex-shrink-0" />
-                        <span>Group ({appointment.mentees?.length || 0} participants)</span>
-                    </div>
-                )}
+                <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 flex-shrink-0" />
+                    <span>{enrolled} / {appointment.max_participants || '∞'} enrolled</span>
+                </div>
             </div>
         </button>
     );

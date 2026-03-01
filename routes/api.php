@@ -39,11 +39,16 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/appointments', [AppointmentController::class, 'index']);
     Route::post('/appointments', [AppointmentController::class, 'store']);
     Route::get('/appointments/calendar', [AppointmentController::class, 'calendar']);
+    Route::get('/appointments/available', [AppointmentController::class, 'available']);
     Route::get('/appointments/{ulid}', [AppointmentController::class, 'show']);
     Route::put('/appointments/{ulid}', [AppointmentController::class, 'update']);
+    Route::post('/appointments/{ulid}/enroll', [AppointmentController::class, 'enroll']);
+    Route::post('/appointments/{ulid}/unenroll', [AppointmentController::class, 'unenroll']);
     Route::post('/appointments/{ulid}/approve', [AppointmentController::class, 'approve']);
     Route::post('/appointments/{ulid}/reject', [AppointmentController::class, 'reject']);
     Route::post('/appointments/{ulid}/cancel', [AppointmentController::class, 'cancel']);
+    Route::post('/appointments/{ulid}/mentees/{menteeId}/approve', [AppointmentController::class, 'approveMentee']);
+    Route::post('/appointments/{ulid}/mentees/{menteeId}/reject', [AppointmentController::class, 'rejectMentee']);
 
     // Sessions
     Route::get('/sessions', [MentoringSessionController::class, 'index']);

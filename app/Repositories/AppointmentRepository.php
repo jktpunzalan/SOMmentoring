@@ -57,6 +57,16 @@ class AppointmentRepository
         return $query->orderBy('scheduled_at')->get();
     }
 
+    public function getAvailableSlots(int $mentorId, int $menteeId): Collection
+    {
+        return Appointment::with(['mentor', 'mentees.mentee'])
+            ->where('mentor_id', $mentorId)
+            ->where('status', 'open')
+            ->where('scheduled_at', '>', now())
+            ->orderBy('scheduled_at')
+            ->get();
+    }
+
     public function hasOverlap(int $mentorId, string $scheduledAt, int $durationMinutes, ?int $excludeId = null): bool
     {
         $startTime = $scheduledAt;
