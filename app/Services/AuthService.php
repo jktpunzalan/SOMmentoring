@@ -66,6 +66,9 @@ class AuthService
 
         Auth::login($user);
 
+        request()->session()->regenerate();
+        request()->session()->regenerateToken();
+
         return $user;
     }
 
