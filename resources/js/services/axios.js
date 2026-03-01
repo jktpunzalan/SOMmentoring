@@ -11,6 +11,11 @@ const api = axios.create({
     withXSRFToken: true,
 });
 
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+if (csrfToken) {
+    api.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+}
+
 api.interceptors.response.use(
     (response) => response,
     (error) => {
