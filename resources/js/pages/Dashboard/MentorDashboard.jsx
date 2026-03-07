@@ -50,9 +50,9 @@ const MentorDashboard = () => {
                     <Calendar className="w-5 h-5" />
                     <span className="font-medium">Open Slot</span>
                 </ClickableCard>
-                <ClickableCard to="/mentees" className="bg-white border border-gray-200 text-gray-700 p-4 flex items-center gap-3 hover:bg-gray-50 min-h-[56px]" ariaLabel="View Mentees">
+                <ClickableCard to="/reports" className="bg-white border border-gray-200 text-gray-700 p-4 flex items-center gap-3 hover:bg-gray-50 min-h-[56px]" ariaLabel="Export Reports">
                     <Users className="w-5 h-5" />
-                    <span className="font-medium">View Mentees</span>
+                    <span className="font-medium">Export Reports</span>
                 </ClickableCard>
             </div>
         </div>

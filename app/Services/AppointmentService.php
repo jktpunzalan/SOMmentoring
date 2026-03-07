@@ -59,6 +59,16 @@ class AppointmentService
                 'status' => 'open',
             ]);
 
+            $menteeIds = $data['mentee_ids'] ?? [];
+            if (!empty($menteeIds)) {
+                foreach ($menteeIds as $menteeId) {
+                    $appointment->mentees()->create([
+                        'mentee_id' => $menteeId,
+                        'status' => 'approved',
+                    ]);
+                }
+            }
+
             return $appointment->load(['mentor', 'proposedBy', 'mentees.mentee']);
         });
     }
