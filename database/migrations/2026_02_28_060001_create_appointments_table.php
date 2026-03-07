@@ -20,7 +20,7 @@ return new class extends Migration
             $table->smallInteger('duration_minutes')->unsigned()->default(60);
             $table->boolean('is_group')->default(false);
             $table->tinyInteger('max_participants')->unsigned()->default(15);
-            $table->enum('status', ['pending', 'approved', 'rejected', 'cancelled', 'completed'])->default('pending');
+            $table->enum('status', ['open', 'pending', 'approved', 'rejected', 'cancelled', 'completed', 'ongoing'])->default('pending');
             $table->text('rejection_reason')->nullable();
             $table->timestamp('approved_at')->nullable();
             $table->foreignId('approved_by_id')->nullable()->constrained('users')->nullOnDelete();

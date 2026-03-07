@@ -54,4 +54,16 @@ class AppointmentPolicy
         if ($user->isSuperAdmin()) return true;
         return $user->id === $appointment->proposed_by_id || $user->id === $appointment->mentor_id;
     }
+
+    public function removeConfirmed(User $user, Appointment $appointment): bool
+    {
+        if (!$user->isMentor()) return false;
+        return $user->id === $appointment->mentor_id;
+    }
+
+    public function removeMentee(User $user, Appointment $appointment): bool
+    {
+        if (!$user->isMentor()) return false;
+        return $user->id === $appointment->mentor_id;
+    }
 }

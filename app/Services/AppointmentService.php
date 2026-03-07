@@ -216,6 +216,55 @@ class AppointmentService
         return $this->appointmentRepository->update($appointment, ['status' => 'cancelled']);
     }
 
+    public function removeConfirmedAppointment(string $ulid, User $user): void
+    {
+        abort_if(!$user->isMentor(), 403, 'Only mentors can remove appointments.');
+
+        $appointment = $this->show($ulid);
+
+        abort_if($appointment->mentor_id !== $user->id, 403, 'You are not authorized to remove this appointment.');
+
+        abort_if(
+            !in_array($appointment->status, ['open', 'approved']),
+            422,
+            'Only open or approved appointments can be removed.'
+        );
+
+        abort_if($appointment->session && $appointment->session->isOngoing(), 422, 'Cannot remove an appointment with an active session.');
+
+        DB::transaction(function () use ($appointment, $user) {
+            $appointment->delete();
+
+            $this->notificationService->createInternalNotification($user->id, 'appointment.removed', 'Appointment Removed', "You removed the appointment: {$appointment->title}.", [
+                'appointment_ulid' => $appointment->ulid,
+            ]);
+        });
+    }
+
+    public function removeMenteeFromSlot(string $ulid, int $menteeId, User $user): Appointment
+    {
+        abort_if(!$user->isMentor(), 403, 'Only mentors can remove mentees.');
+
+        $appointment = $this->show($ulid);
+
+        abort_if($appointment->mentor_id !== $user->id, 403, 'You are not authorized to modify this appointment.');
+        abort_if($appointment->session && $appointment->session->isOngoing(), 422, 'Cannot remove a mentee while a session is active.');
+
+        $pivot = $appointment->mentees()->where('mentee_id', $menteeId)->first();
+        abort_if(!$pivot, 404, 'Mentee not found in this appointment.');
+
+        DB::transaction(function () use ($appointment, $menteeId, $user) {
+            $this->appointmentRepository->removeMenteeFromAppointment($appointment->id, $menteeId);
+
+            $this->notificationService->createInternalNotification($user->id, 'appointment.mentee_removed', 'Mentee Removed', "You removed a mentee from the appointment: {$appointment->title}.", [
+                'appointment_ulid' => $appointment->ulid,
+                'mentee_id' => $menteeId,
+            ]);
+        });
+
+        return $appointment->fresh(['mentor', 'proposedBy', 'mentees.mentee', 'session']);
+    }
+
     public function getCalendarData(User $user, string $startDate, string $endDate): Collection
     {
         return $this->appointmentRepository->getCalendarData(

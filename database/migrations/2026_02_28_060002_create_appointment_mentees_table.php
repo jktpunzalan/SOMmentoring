@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('appointment_id')->constrained('appointments')->cascadeOnDelete();
             $table->foreignId('mentee_id')->constrained('users')->cascadeOnDelete();
-            $table->enum('status', ['invited', 'accepted', 'declined'])->default('invited');
+            $table->enum('status', ['invited', 'pending', 'approved', 'rejected', 'accepted', 'declined'])->default('invited');
             $table->timestamps();
 
             $table->unique(['appointment_id', 'mentee_id']);

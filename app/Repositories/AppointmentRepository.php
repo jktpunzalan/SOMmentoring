@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Appointment;
+use App\Models\AppointmentMentee;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -73,13 +74,21 @@ class AppointmentRepository
         $endTime = \Carbon\Carbon::parse($scheduledAt)->addMinutes($durationMinutes)->toDateTimeString();
 
         $query = Appointment::where('mentor_id', $mentorId)
-            ->where('status', 'approved')
-            ->where(function ($q) use ($startTime, $endTime) {
+            ->where('status', 'approved');
+
+        $driver = Appointment::query()->getConnection()->getDriverName();
+        if ($driver === 'sqlite') {
+            $startBound = \Carbon\Carbon::parse($startTime)->subMinutes($durationMinutes)->toDateTimeString();
+            $query->where('scheduled_at', '<', $endTime)
+                ->where('scheduled_at', '>', $startBound);
+        } else {
+            $query->where(function ($q) use ($startTime, $endTime) {
                 $q->where(function ($inner) use ($startTime, $endTime) {
                     $inner->where('scheduled_at', '<', $endTime)
                           ->whereRaw('DATE_ADD(scheduled_at, INTERVAL duration_minutes MINUTE) > ?', [$startTime]);
                 });
             });
+        }
 
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
@@ -97,5 +106,12 @@ class AppointmentRepository
     {
         $appointment->update($data);
         return $appointment->fresh();
+    }
+
+    public function removeMenteeFromAppointment(int $appointmentId, int $menteeId): int
+    {
+        return AppointmentMentee::where('appointment_id', $appointmentId)
+            ->where('mentee_id', $menteeId)
+            ->delete();
     }
 }

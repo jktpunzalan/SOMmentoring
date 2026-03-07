@@ -48,14 +48,37 @@ class AppointmentTest extends TestCase
     {
         [$mentor, $mentee] = $this->createMentorMenteePair();
 
+        $slot = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'open',
+            'scheduled_at' => now()->addDays(2),
+            'max_participants' => 10,
+        ]);
+
+        $response = $this->actingAs($mentee)->postJson("/api/v1/appointments/{$slot->ulid}/enroll");
+
+        $response->assertOk()
+            ->assertJsonPath('data.ulid', $slot->ulid);
+
+        $this->assertDatabaseHas('appointment_mentees', [
+            'appointment_id' => $slot->id,
+            'mentee_id' => $mentee->id,
+            'status' => 'pending',
+        ]);
+    }
+
+    public function test_mentee_cannot_create_appointment_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
         $response = $this->actingAs($mentee)->postJson('/api/v1/appointments', [
             'title' => 'Need help with thesis',
             'scheduled_at' => now()->addDays(2)->toDateTimeString(),
             'duration_minutes' => 30,
         ]);
 
-        $response->assertStatus(201)
-            ->assertJsonPath('data.status', 'pending');
+        $response->assertStatus(403);
     }
 
     public function test_mentor_can_approve_appointment(): void
@@ -159,5 +182,101 @@ class AppointmentTest extends TestCase
         $response = $this->actingAs($mentor)->postJson("/api/v1/appointments/{$appointment->ulid}/approve");
 
         $response->assertStatus(422);
+    }
+
+    public function test_mentor_can_remove_open_appointment_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'open',
+            'scheduled_at' => now()->addDay(),
+        ]);
+
+        $response = $this->actingAs($mentor)->deleteJson("/api/v1/appointments/{$appointment->ulid}/remove");
+
+        $response->assertOk()
+            ->assertJsonPath('data', null)
+            ->assertJsonPath('meta.message', 'Appointment removed successfully.');
+
+        $this->assertSoftDeleted('appointments', ['id' => $appointment->id]);
+    }
+
+    public function test_mentor_cannot_remove_pending_appointment_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'pending',
+            'scheduled_at' => now()->addDay(),
+        ]);
+
+        $response = $this->actingAs($mentor)->deleteJson("/api/v1/appointments/{$appointment->ulid}/remove");
+        $response->assertStatus(422);
+    }
+
+    public function test_mentee_cannot_remove_appointment_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'open',
+            'scheduled_at' => now()->addDay(),
+        ]);
+
+        $response = $this->actingAs($mentee)->deleteJson("/api/v1/appointments/{$appointment->ulid}/remove");
+        $response->assertStatus(403);
+    }
+
+    public function test_mentor_can_remove_mentee_from_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'open',
+            'scheduled_at' => now()->addDay(),
+        ]);
+
+        $appointment->mentees()->create([
+            'mentee_id' => $mentee->id,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($mentor)->deleteJson("/api/v1/appointments/{$appointment->ulid}/mentees/{$mentee->id}");
+
+        $response->assertOk();
+        $this->assertDatabaseMissing('appointment_mentees', [
+            'appointment_id' => $appointment->id,
+            'mentee_id' => $mentee->id,
+        ]);
+    }
+
+    public function test_mentee_cannot_remove_other_mentee_from_slot(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentor->id,
+            'status' => 'open',
+            'scheduled_at' => now()->addDay(),
+        ]);
+
+        $appointment->mentees()->create([
+            'mentee_id' => $mentee->id,
+            'status' => 'pending',
+        ]);
+
+        $response = $this->actingAs($mentee)->deleteJson("/api/v1/appointments/{$appointment->ulid}/mentees/{$mentee->id}");
+
+        $response->assertStatus(403);
     }
 }

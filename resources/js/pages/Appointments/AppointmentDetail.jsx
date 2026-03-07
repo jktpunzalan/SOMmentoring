@@ -4,14 +4,14 @@ import { useAuth } from '@/hooks/useAuth';
 import {
     useAppointment, useUpdateAppointment, useEnrollAppointment,
     useUnenrollAppointment, useApproveMentee, useRejectMentee,
-    useCancelAppointment,
+    useCancelAppointment, useRemoveAppointment, useRemoveMenteeFromAppointment,
 } from '@/hooks/useAppointments';
 import { useCreateSession } from '@/hooks/useSessions';
 import AppointmentStatusBadge from '@/components/appointments/AppointmentStatusBadge';
 import ConfirmDialog from '@/components/shared/ConfirmDialog';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorBanner from '@/components/shared/ErrorBanner';
-import { Calendar, Clock, MapPin, Users, Play, X, Check, UserPlus, LogOut, Pencil } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Play, X, Check, UserPlus, LogOut, Pencil, Trash2, UserMinus } from 'lucide-react';
 
 const menteeStatusBadge = {
     pending: 'bg-yellow-100 text-yellow-800',
@@ -31,8 +31,12 @@ const AppointmentDetail = () => {
     const approveMentee = useApproveMentee();
     const rejectMentee = useRejectMentee();
     const cancel = useCancelAppointment();
+    const removeAppointment = useRemoveAppointment();
+    const removeMentee = useRemoveMenteeFromAppointment();
     const createSession = useCreateSession();
     const [showCancel, setShowCancel] = useState(false);
+    const [showRemove, setShowRemove] = useState(false);
+    const [removingMenteeId, setRemovingMenteeId] = useState(null);
     const [editing, setEditing] = useState(false);
     const [editForm, setEditForm] = useState({});
     const [error, setError] = useState('');
@@ -46,6 +50,7 @@ const AppointmentDetail = () => {
     const isOpen = appointment.status === 'open';
     const canCancel = ['pending', 'approved', 'open'].includes(appointment.status) && (isMentorOwner || user?.role === 'super_admin');
     const canEdit = isOpen && (isMentorOwner || user?.role === 'super_admin');
+    const canRemove = isMentor && isMentorOwner && ['open', 'approved'].includes(appointment.status);
 
     const myEnrollment = isMentee ? appointment.mentees?.find(m => m.mentee_id === user?.id) : null;
     const isEnrolled = !!myEnrollment;
@@ -64,6 +69,21 @@ const AppointmentDetail = () => {
     const handleApproveMentee = (menteeId) => approveMentee.mutate({ ulid, menteeId }, { onError: onErr });
     const handleRejectMentee = (menteeId) => rejectMentee.mutate({ ulid, menteeId }, { onError: onErr });
     const handleCancel = () => cancel.mutate(ulid, { onSuccess: () => setShowCancel(false), onError: onErr });
+    const handleRemoveAppointment = () => removeAppointment.mutate(ulid, {
+        onSuccess: () => {
+            setShowRemove(false);
+            navigate('/appointments');
+        },
+        onError: onErr,
+    });
+
+    const handleRemoveMentee = () => {
+        if (!removingMenteeId) return;
+        removeMentee.mutate({ ulid, menteeId: removingMenteeId }, {
+            onSuccess: () => setRemovingMenteeId(null),
+            onError: onErr,
+        });
+    };
 
     const handleStartSession = () => {
         const menteeIds = approvedMentees.map(m => m.mentee_id);
@@ -185,13 +205,20 @@ const AppointmentDetail = () => {
                                         {m.status}
                                     </span>
                                 </div>
-                                {m.status === 'pending' && (
+                                {isMentor && isMentorOwner && (
                                     <div className="flex items-center gap-1">
-                                        <button onClick={() => handleApproveMentee(m.mentee_id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center" title="Approve">
-                                            <Check className="w-4 h-4" />
-                                        </button>
-                                        <button onClick={() => handleRejectMentee(m.mentee_id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center" title="Reject">
-                                            <X className="w-4 h-4" />
+                                        {m.status === 'pending' && (
+                                            <>
+                                                <button onClick={() => handleApproveMentee(m.mentee_id)} className="p-2 text-green-600 hover:bg-green-50 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center" title="Approve">
+                                                    <Check className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={() => handleRejectMentee(m.mentee_id)} className="p-2 text-red-600 hover:bg-red-50 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center" title="Reject">
+                                                    <X className="w-4 h-4" />
+                                                </button>
+                                            </>
+                                        )}
+                                        <button onClick={() => setRemovingMenteeId(m.mentee_id)} className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg min-w-[40px] min-h-[40px] flex items-center justify-center" title="Remove mentee">
+                                            <UserMinus className="w-4 h-4" />
                                         </button>
                                     </div>
                                 )}
@@ -217,9 +244,32 @@ const AppointmentDetail = () => {
                         Cancel Slot
                     </button>
                 )}
+                {canRemove && (
+                    <button onClick={() => setShowRemove(true)} className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-red-50 text-red-700 font-medium rounded-lg hover:bg-red-100 min-h-[48px]">
+                        <Trash2 className="w-4 h-4" /> Remove Appointment
+                    </button>
+                )}
             </div>
 
             <ConfirmDialog isOpen={showCancel} onClose={() => setShowCancel(false)} onConfirm={handleCancel} title="Cancel Appointment Slot" message="Are you sure you want to cancel this slot? All enrolled mentees will be notified." confirmText="Yes, Cancel" />
+
+            <ConfirmDialog
+                isOpen={showRemove}
+                onClose={() => setShowRemove(false)}
+                onConfirm={handleRemoveAppointment}
+                title="Remove Appointment"
+                message="This will permanently remove this appointment from the system. The mentee will no longer see it. This action cannot be undone. Are you sure?"
+                confirmText="Yes, Remove"
+            />
+
+            <ConfirmDialog
+                isOpen={!!removingMenteeId}
+                onClose={() => setRemovingMenteeId(null)}
+                onConfirm={handleRemoveMentee}
+                title="Remove Mentee"
+                message="This will remove this mentee from the appointment slot. Are you sure?"
+                confirmText="Yes, Remove"
+            />
         </div>
     );
 };

@@ -104,4 +104,34 @@ class AppointmentController extends Controller
         $appointments = $this->service->getCalendarData($request->user(), $start, $end);
         return response()->json(['data' => AppointmentResource::collection($appointments)]);
     }
+
+    public function destroyConfirmed(Request $request, string $ulid): JsonResponse
+    {
+        $appointment = $this->service->show($ulid);
+        $this->authorize('removeConfirmed', $appointment);
+
+        $this->service->removeConfirmedAppointment($ulid, $request->user());
+
+        return response()->json([
+            'data' => null,
+            'meta' => [
+                'message' => 'Appointment removed successfully.',
+                'timestamp' => now()->toISOString(),
+                'version' => '1.0',
+            ],
+        ]);
+    }
+
+    public function removeMentee(Request $request, string $ulid, int $menteeId): JsonResponse
+    {
+        $appointment = $this->service->show($ulid);
+        $this->authorize('removeMentee', $appointment);
+
+        $updated = $this->service->removeMenteeFromSlot($ulid, $menteeId, $request->user());
+
+        return response()->json([
+            'message' => 'Mentee removed.',
+            'data' => new AppointmentResource($updated),
+        ]);
+    }
 }

@@ -49,6 +49,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/appointments/{ulid}/cancel', [AppointmentController::class, 'cancel']);
     Route::post('/appointments/{ulid}/mentees/{menteeId}/approve', [AppointmentController::class, 'approveMentee']);
     Route::post('/appointments/{ulid}/mentees/{menteeId}/reject', [AppointmentController::class, 'rejectMentee']);
+    Route::delete('/appointments/{ulid}/remove', [AppointmentController::class, 'destroyConfirmed'])->name('appointments.remove');
+    Route::delete('/appointments/{ulid}/mentees/{menteeId}', [AppointmentController::class, 'removeMentee']);
 
     // Sessions
     Route::get('/sessions', [MentoringSessionController::class, 'index']);

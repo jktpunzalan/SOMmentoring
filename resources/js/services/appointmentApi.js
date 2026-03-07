@@ -60,6 +60,16 @@ export const cancelAppointment = async (ulid) => {
     return response.data;
 };
 
+export const removeAppointment = async (ulid) => {
+    const response = await api.delete(`/appointments/${ulid}/remove`);
+    return response.data;
+};
+
+export const removeMenteeFromAppointment = async (ulid, menteeId) => {
+    const response = await api.delete(`/appointments/${ulid}/mentees/${menteeId}`);
+    return response.data;
+};
+
 export const getCalendarData = async (params = {}) => {
     const response = await api.get('/appointments/calendar', { params });
     return response.data;

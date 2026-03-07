@@ -14,6 +14,17 @@ class NotificationService
         private NotificationRepository $notificationRepository,
     ) {}
 
+    public function createInternalNotification(int $userId, string $type, string $title, string $message, array $data = []): void
+    {
+        $this->notificationRepository->create([
+            'user_id' => $userId,
+            'type' => $type,
+            'title' => $title,
+            'message' => $message,
+            'data' => $data,
+        ]);
+    }
+
     public function list(User $user, array $filters = []): LengthAwarePaginator
     {
         return $this->notificationRepository->getByUser($user->id, $filters);

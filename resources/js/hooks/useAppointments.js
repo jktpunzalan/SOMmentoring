@@ -109,3 +109,19 @@ export const useCancelAppointment = () => {
         onSuccess: () => invalidateAll(queryClient),
     });
 };
+
+export const useRemoveAppointment = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: appointmentApi.removeAppointment,
+        onSuccess: () => invalidateAll(queryClient),
+    });
+};
+
+export const useRemoveMenteeFromAppointment = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ ulid, menteeId }) => appointmentApi.removeMenteeFromAppointment(ulid, menteeId),
+        onSuccess: () => invalidateAll(queryClient),
+    });
+};
