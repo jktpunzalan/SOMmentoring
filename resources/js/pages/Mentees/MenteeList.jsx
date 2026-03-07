@@ -4,10 +4,11 @@ import { useMentees } from '@/hooks/useMentees';
 import MenteeCard from '@/components/mentees/MenteeCard';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import EmptyState from '@/components/shared/EmptyState';
+import ErrorBanner from '@/components/shared/ErrorBanner';
 import { Users, UserPlus } from 'lucide-react';
 
 const MenteeList = () => {
-    const { data, isLoading } = useMentees();
+    const { data, isLoading, error } = useMentees();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const mentees = data?.data || [];
@@ -24,12 +25,13 @@ const MenteeList = () => {
         }
     }, [filter, navigate]);
 
-    if (filter === 'pending') return <LoadingSpinner />;
+    if (filter === 'pending') return null;
 
     const visibleApproved = filter === 'approved' ? approved : approved;
 
     return (
         <div className="space-y-6">
+            {error && <ErrorBanner message="Failed to load mentees." />}
             {pending.length > 0 && (
                 <button onClick={() => navigate('/mentees/pending')} className="w-full bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3 hover:bg-yellow-100 transition-colors">
                     <UserPlus className="w-5 h-5 text-yellow-600" />

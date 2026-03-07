@@ -15,13 +15,13 @@ class MentorMenteeController extends Controller
     public function index(Request $request): JsonResponse
     {
         $mentees = $this->service->getMenteesByMentor($request->user()->id);
-        return response()->json(['data' => MentorMenteeResource::collection($mentees)]);
+        return response()->json(MentorMenteeResource::collection($mentees)->response()->getData(true));
     }
 
     public function pending(Request $request): JsonResponse
     {
         $pending = $this->service->getPendingByMentor($request->user()->id);
-        return response()->json(['data' => MentorMenteeResource::collection($pending)]);
+        return response()->json(MentorMenteeResource::collection($pending)->response()->getData(true));
     }
 
     public function approve(Request $request, int $id): JsonResponse

@@ -12,7 +12,7 @@ const MentorDashboard = () => {
     if (isLoading) return <LoadingSpinner />;
 
     const stats = [
-        { label: 'Approved Mentees', value: data?.total_mentees || 0, icon: Users, color: 'bg-blue-100 text-blue-600' },
+        { label: 'Approved Mentees', value: data?.total_mentees || 0, icon: Users, color: 'bg-blue-100 text-blue-600', action: () => navigate('/mentees?filter=approved') },
         { label: 'Pending Registrations', value: data?.pending_mentees || 0, icon: UserPlus, color: 'bg-yellow-100 text-yellow-600', action: () => navigate('/mentees/pending') },
         { label: 'Upcoming Appointments', value: data?.upcoming_appointments || 0, icon: Calendar, color: 'bg-green-100 text-green-600', action: () => navigate('/appointments') },
         { label: 'Completed Sessions', value: data?.completed_sessions || 0, icon: BookOpen, color: 'bg-purple-100 text-purple-600', action: () => navigate('/sessions') },
@@ -46,7 +46,7 @@ const MentorDashboard = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <ClickableCard to="/appointments/new" className="bg-indigo-600 text-white p-4 flex items-center gap-3 hover:bg-indigo-700 min-h-[56px]" ariaLabel="Open Slot">
+                <ClickableCard to="/appointments/new" className="bg-white border border-gray-200 text-gray-900 p-4 flex items-center gap-3 hover:bg-gray-50 min-h-[56px]" ariaLabel="Open Slot">
                     <Calendar className="w-5 h-5" />
                     <span className="font-medium">Open Slot</span>
                 </ClickableCard>
