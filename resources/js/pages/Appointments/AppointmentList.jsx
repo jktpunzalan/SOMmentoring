@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppointments, useAvailableSlots } from '@/hooks/useAppointments';
 import AppointmentCard from '@/components/appointments/AppointmentCard';
@@ -10,12 +10,28 @@ import { Calendar, Plus, Search } from 'lucide-react';
 const AppointmentList = () => {
     const { isMentor, isMentee } = useAuth();
     const navigate = useNavigate();
-    const [tab, setTab] = useState(isMentee ? 'available' : 'my');
+    const [searchParams] = useSearchParams();
+    const initialTab = isMentee ? 'available' : 'my';
+    const [tab, setTab] = useState(initialTab);
     const { data: myData, isLoading: myLoading } = useAppointments();
     const { data: availData, isLoading: availLoading } = useAvailableSlots(isMentee);
 
     const myAppointments = myData?.data || [];
     const availableSlots = availData?.data || [];
+
+    const filter = (searchParams.get('filter') || '').toLowerCase();
+    const now = new Date();
+
+    const applyFilter = (items) => {
+        if (!filter || filter === 'all') return items;
+        if (filter === 'upcoming') {
+            return items.filter((a) => a?.scheduled_at && new Date(a.scheduled_at) > now);
+        }
+        return items.filter((a) => (a?.status || '').toLowerCase() === filter);
+    };
+
+    const filteredMyAppointments = applyFilter(myAppointments);
+    const filteredAvailableSlots = applyFilter(availableSlots);
 
     const tabClass = (active) =>
         `px-3 py-2 text-sm font-medium rounded-lg min-h-[40px] transition-colors ${active ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`;
@@ -41,21 +57,21 @@ const AppointmentList = () => {
             </div>
 
             {tab === 'available' && isMentee && (
-                availableSlots.length === 0 ? (
+                filteredAvailableSlots.length === 0 ? (
                     <EmptyState icon={Search} title="No available slots" message="Your mentor hasn't opened any appointment slots yet." />
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {availableSlots.map((a) => <AppointmentCard key={a.ulid} appointment={a} />)}
+                        {filteredAvailableSlots.map((a) => <AppointmentCard key={a.ulid} appointment={a} />)}
                     </div>
                 )
             )}
 
             {tab === 'my' && (
-                myAppointments.length === 0 ? (
+                filteredMyAppointments.length === 0 ? (
                     <EmptyState icon={Calendar} title="No appointments" message={isMentor ? "Open your first appointment slot to get started." : "Sign up for an available slot from your mentor."} />
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {myAppointments.map((a) => <AppointmentCard key={a.ulid || a.id} appointment={a} />)}
+                        {filteredMyAppointments.map((a) => <AppointmentCard key={a.ulid || a.id} appointment={a} />)}
                     </div>
                 )
             )}

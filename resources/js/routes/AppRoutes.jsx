@@ -20,6 +20,7 @@ import SessionList from '@/pages/Sessions/SessionList';
 import SessionDetail from '@/pages/Sessions/SessionDetail';
 import ActiveSession from '@/pages/Sessions/ActiveSession';
 import ProfilePage from '@/pages/Profile/ProfilePage';
+import NotificationsPage from '@/pages/Notifications/NotificationsPage';
 import UserManagement from '@/pages/Admin/UserManagement';
 
 const ProtectedRoute = ({ children, roles }) => {
@@ -67,6 +68,7 @@ const AppRoutes = () => {
                 <Route path="sessions/:ulid" element={<SessionDetail />} />
                 <Route path="sessions/:ulid/active" element={<ProtectedRoute roles={['mentor']}><ActiveSession /></ProtectedRoute>} />
 
+                <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />
                 <Route path="admin/users" element={<ProtectedRoute roles={['super_admin']}><UserManagement /></ProtectedRoute>} />
             </Route>

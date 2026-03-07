@@ -17,7 +17,9 @@ class UserResource extends JsonResource
             'student_id' => $this->when($this->role === 'mentee', $this->student_id),
             'year_level' => $this->when($this->role === 'mentee', $this->year_level),
             'phone' => $this->phone,
-            'avatar' => $this->avatar,
+            'avatar' => $this->avatar
+                ? route('profile.avatar', ['filename' => basename($this->avatar)])
+                : null,
             'profile_complete' => $this->profile_complete,
             'created_at' => $this->created_at?->toISOString(),
         ];

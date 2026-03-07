@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDashboard } from '@/hooks/useSessions';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
+import ClickableCard from '@/components/shared/ClickableCard';
 import { Users, UserPlus, Calendar, BookOpen, Play } from 'lucide-react';
 
 const MentorDashboard = () => {
@@ -20,7 +21,7 @@ const MentorDashboard = () => {
     return (
         <div className="space-y-6">
             {data?.ongoing_session && (
-                <button onClick={() => navigate(`/sessions/${data.ongoing_session.ulid}/active`)} className="w-full bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4 flex items-center gap-4 hover:bg-emerald-100 transition-colors">
+                <ClickableCard to={`/sessions/${data.ongoing_session.ulid}/active`} className="bg-emerald-50 border-2 border-emerald-200 p-4 flex items-center gap-4 hover:bg-emerald-100">
                     <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center">
                         <Play className="w-6 h-6 text-emerald-600" />
                     </div>
@@ -29,30 +30,30 @@ const MentorDashboard = () => {
                         <p className="text-lg font-bold text-emerald-900">{data.ongoing_session.title}</p>
                         <p className="text-xs text-emerald-600">Started {new Date(data.ongoing_session.started_at).toLocaleTimeString()}</p>
                     </div>
-                </button>
+                </ClickableCard>
             )}
 
             <div className="grid grid-cols-2 gap-3">
                 {stats.map((stat) => (
-                    <button key={stat.label} onClick={stat.action} className="bg-white rounded-xl border border-gray-200 p-4 text-left hover:shadow-md transition-shadow">
+                    <ClickableCard key={stat.label} onClick={stat.action} className="p-4" ariaLabel={stat.label}>
                         <div className={`w-10 h-10 rounded-lg ${stat.color} flex items-center justify-center mb-3`}>
                             <stat.icon className="w-5 h-5" />
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
                         <p className="text-xs text-gray-500 mt-0.5">{stat.label}</p>
-                    </button>
+                    </ClickableCard>
                 ))}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button onClick={() => navigate('/appointments/new')} className="bg-indigo-600 text-white rounded-xl p-4 flex items-center gap-3 hover:bg-indigo-700 transition-colors min-h-[56px]">
+                <ClickableCard to="/appointments/new" className="bg-indigo-600 text-white p-4 flex items-center gap-3 hover:bg-indigo-700 min-h-[56px]" ariaLabel="Open Slot">
                     <Calendar className="w-5 h-5" />
-                    <span className="font-medium">New Appointment</span>
-                </button>
-                <button onClick={() => navigate('/mentees')} className="bg-white border border-gray-200 text-gray-700 rounded-xl p-4 flex items-center gap-3 hover:bg-gray-50 transition-colors min-h-[56px]">
+                    <span className="font-medium">Open Slot</span>
+                </ClickableCard>
+                <ClickableCard to="/mentees" className="bg-white border border-gray-200 text-gray-700 p-4 flex items-center gap-3 hover:bg-gray-50 min-h-[56px]" ariaLabel="View Mentees">
                     <Users className="w-5 h-5" />
                     <span className="font-medium">View Mentees</span>
-                </button>
+                </ClickableCard>
             </div>
         </div>
     );

@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useMentees } from '@/hooks/useMentees';
 import MenteeCard from '@/components/mentees/MenteeCard';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
@@ -9,12 +9,24 @@ import { Users, UserPlus } from 'lucide-react';
 const MenteeList = () => {
     const { data, isLoading } = useMentees();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const mentees = data?.data || [];
 
     if (isLoading) return <LoadingSpinner />;
 
     const approved = mentees.filter(m => m.status === 'approved');
     const pending = mentees.filter(m => m.status === 'pending');
+
+    const filter = (searchParams.get('filter') || '').toLowerCase();
+    useEffect(() => {
+        if (filter === 'pending') {
+            navigate('/mentees/pending', { replace: true });
+        }
+    }, [filter, navigate]);
+
+    if (filter === 'pending') return <LoadingSpinner />;
+
+    const visibleApproved = filter === 'approved' ? approved : approved;
 
     return (
         <div className="space-y-6">
@@ -27,11 +39,11 @@ const MenteeList = () => {
 
             <div>
                 <h2 className="text-lg font-semibold text-gray-900 mb-3">Approved Mentees ({approved.length})</h2>
-                {approved.length === 0 ? (
+                {visibleApproved.length === 0 ? (
                     <EmptyState icon={Users} title="No mentees yet" message="Approved mentees will appear here." />
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        {approved.map((m) => <MenteeCard key={m.id} mentorMentee={m} />)}
+                        {visibleApproved.map((m) => <MenteeCard key={m.id} mentorMentee={m} />)}
                     </div>
                 )}
             </div>

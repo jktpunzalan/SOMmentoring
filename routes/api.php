@@ -80,6 +80,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);
     Route::put('/profile', [ProfileController::class, 'update']);
+    Route::get('/profile/avatar/{filename}', [ProfileController::class, 'serveAvatar'])->name('profile.avatar');
 
     // Admin: Users
     Route::middleware('role:super_admin')->group(function () {

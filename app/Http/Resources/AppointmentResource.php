@@ -10,6 +10,16 @@ class AppointmentResource extends JsonResource
     public function toArray(Request $request): array
     {
         $durationMinutes = (int) ($this->duration_minutes ?? 0);
+        $enrolledCount = $this->relationLoaded('mentees') ? $this->mentees->count() : null;
+        $remainingSlots = null;
+        if ($enrolledCount !== null && $this->max_participants !== null) {
+            $remainingSlots = max(0, ((int) $this->max_participants) - $enrolledCount);
+        }
+
+        $displayStatus = $this->status;
+        if ($this->status === 'open' && $remainingSlots !== null && $remainingSlots <= 0) {
+            $displayStatus = 'closed';
+        }
 
         return [
             'id' => $this->id,
@@ -26,6 +36,9 @@ class AppointmentResource extends JsonResource
             'is_group' => $this->is_group,
             'max_participants' => $this->max_participants,
             'status' => $this->status,
+            'display_status' => $displayStatus,
+            'enrolled_count' => $enrolledCount,
+            'remaining_slots' => $remainingSlots,
             'rejection_reason' => $this->when($this->status === 'rejected', $this->rejection_reason),
             'approved_at' => $this->approved_at?->toISOString(),
             'mentees' => SessionParticipantResource::collection($this->whenLoaded('mentees')),

@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Plus, Clock, MapPin, Users } from 'lucide-re
 
 const statusColor = {
     open: 'bg-indigo-100 text-indigo-800',
+    closed: 'bg-slate-100 text-slate-800',
     pending: 'bg-yellow-100 text-yellow-800',
     approved: 'bg-green-100 text-green-800',
     cancelled: 'bg-gray-100 text-gray-600',
@@ -20,6 +21,7 @@ const AppointmentCalendar = () => {
     const navigate = useNavigate();
     const { isMentor } = useAuth();
     const [currentDate, setCurrentDate] = useState(new Date());
+    const [statusFilter, setStatusFilter] = useState('all');
 
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -33,15 +35,21 @@ const AppointmentCalendar = () => {
 
     const appointments = data?.data || [];
 
+    const getStatus = (a) => (a.display_status || a.status || '').toLowerCase();
+    const filteredAppointments = appointments.filter((a) => {
+        if (!statusFilter || statusFilter === 'all') return true;
+        return getStatus(a) === statusFilter;
+    });
+
     const appointmentsByDate = useMemo(() => {
         const map = {};
-        appointments.forEach((a) => {
+        filteredAppointments.forEach((a) => {
             const dateKey = new Date(a.scheduled_at).toISOString().split('T')[0];
             if (!map[dateKey]) map[dateKey] = [];
             map[dateKey].push(a);
         });
         return map;
-    }, [appointments]);
+    }, [filteredAppointments]);
 
     const daysInMonth = endOfMonth.getDate();
     const startDayOfWeek = startOfMonth.getDay();
@@ -71,11 +79,28 @@ const AppointmentCalendar = () => {
                         <ChevronRight className="w-5 h-5" />
                     </button>
                 </div>
-                {isMentor && (
-                    <button onClick={() => navigate('/appointments/new')} className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 min-h-[44px]">
-                        <Plus className="w-4 h-4" /> Open Slot
-                    </button>
-                )}
+                <div className="flex items-center gap-2">
+                    <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value)}
+                        className="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 min-h-[44px] bg-white"
+                    >
+                        <option value="all">All</option>
+                        <option value="open">Open</option>
+                        <option value="closed">Closed</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="completed">Completed</option>
+                        <option value="rejected">Rejected</option>
+                        <option value="ongoing">Ongoing</option>
+                    </select>
+                    {isMentor && (
+                        <button onClick={() => navigate('/appointments/new')} className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm font-medium rounded-lg hover:bg-indigo-700 min-h-[44px]">
+                            <Plus className="w-4 h-4" /> Open Slot
+                        </button>
+                    )}
+                </div>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
@@ -98,7 +123,7 @@ const AppointmentCalendar = () => {
                                 </div>
                                 <div className="space-y-0.5">
                                     {dayAppointments.slice(0, 2).map((a) => (
-                                        <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className={`w-full text-left px-1 py-0.5 rounded text-[10px] truncate ${statusColor[a.status] || 'bg-gray-100 text-gray-600'}`}>
+                                        <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className={`w-full text-left px-1 py-0.5 rounded text-[10px] truncate ${statusColor[getStatus(a)] || 'bg-gray-100 text-gray-600'}`}>
                                             {a.title}
                                         </button>
                                     ))}
@@ -112,17 +137,17 @@ const AppointmentCalendar = () => {
                 </div>
             </div>
 
-            {appointments.length > 0 && (
+            {filteredAppointments.length > 0 && (
                 <div className="space-y-2">
                     <h3 className="text-sm font-medium text-gray-700">This Month</h3>
-                    {appointments.map((a) => {
+                    {filteredAppointments.map((a) => {
                         const date = new Date(a.scheduled_at);
                         const enrolled = a.mentees?.length || 0;
                         return (
                             <button key={a.ulid} onClick={() => navigate(`/appointments/${a.ulid}`)} className="w-full text-left bg-white rounded-lg border border-gray-200 px-4 py-3 hover:shadow-sm transition-shadow">
                                 <div className="flex items-start justify-between gap-2 mb-1">
                                     <p className="text-sm font-medium text-gray-900">{a.title}</p>
-                                    <AppointmentStatusBadge status={a.status} />
+                                    <AppointmentStatusBadge status={getStatus(a)} />
                                 </div>
                                 <div className="flex flex-wrap items-center gap-3 text-xs text-gray-500">
                                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} {date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}</span>

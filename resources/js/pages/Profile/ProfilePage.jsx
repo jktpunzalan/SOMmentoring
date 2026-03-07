@@ -16,6 +16,7 @@ const ProfilePage = () => {
     const [success, setSuccess] = useState('');
     const [loading, setLoading] = useState(false);
     const [avatarFile, setAvatarFile] = useState(null);
+    const [avatarPreview, setAvatarPreview] = useState('');
 
     useEffect(() => {
         if (user) {
@@ -26,8 +27,16 @@ const ProfilePage = () => {
                 year_level: user.year_level || '',
                 student_id: user.student_id || '',
             });
+            setAvatarPreview('');
         }
     }, [user]);
+
+    useEffect(() => {
+        if (!avatarFile) return;
+        const url = URL.createObjectURL(avatarFile);
+        setAvatarPreview(url);
+        return () => URL.revokeObjectURL(url);
+    }, [avatarFile]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -68,8 +77,14 @@ const ProfilePage = () => {
         <div className="max-w-lg mx-auto">
             <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <div className="flex items-center gap-4 mb-6">
-                    <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
-                        <User className="w-8 h-8" />
+                    <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 overflow-hidden">
+                        {avatarPreview ? (
+                            <img src={avatarPreview} alt="Avatar preview" className="w-full h-full object-cover" />
+                        ) : user?.avatar ? (
+                            <img src={user.avatar} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <User className="w-8 h-8" />
+                        )}
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-gray-900">{user?.name}</h2>
@@ -114,7 +129,7 @@ const ProfilePage = () => {
                     )}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Avatar</label>
-                        <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files[0])} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+                        <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
                         <InlineFieldError error={errors.avatar} />
                     </div>
                     <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 min-h-[48px]">

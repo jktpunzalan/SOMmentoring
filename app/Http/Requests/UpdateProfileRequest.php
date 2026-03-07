@@ -20,7 +20,7 @@ class UpdateProfileRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'year_level' => ['nullable', 'string', 'max:50'],
             'student_id' => ['nullable', 'string', 'max:100'],
-            'avatar' => ['nullable', 'file', 'image', 'max:2048'],
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:5120'],
         ];
     }
 }

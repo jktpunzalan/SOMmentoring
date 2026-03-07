@@ -34,4 +34,15 @@ class ProfileController extends Controller
         $updated = $this->userRepository->update($user, $data);
         return response()->json(['message' => 'Profile updated.', 'data' => new UserResource($updated)]);
     }
+
+    public function serveAvatar(Request $request, string $filename)
+    {
+        $filename = basename($filename);
+        abort_if($filename === '' || str_contains($filename, '..'), 404);
+
+        $path = 'private/avatars/' . $filename;
+        abort_if(!Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path);
+    }
 }
