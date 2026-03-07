@@ -22,6 +22,7 @@ import ActiveSession from '@/pages/Sessions/ActiveSession';
 import ProfilePage from '@/pages/Profile/ProfilePage';
 import NotificationsPage from '@/pages/Notifications/NotificationsPage';
 import UserManagement from '@/pages/Admin/UserManagement';
+import ErrorBoundary from '@/components/shared/ErrorBoundary';
 
 const ProtectedRoute = ({ children, roles }) => {
     const { user, loading, isAuthenticated } = useAuth();
@@ -52,7 +53,7 @@ const AppRoutes = () => {
             <Route path="/register" element={<GuestRoute><RegisterMentee /></GuestRoute>} />
             <Route path="/pending-approval" element={<PendingApproval />} />
 
-            <Route path="/" element={<ProtectedRoute><AppShell /></ProtectedRoute>}>
+            <Route path="/" element={<ProtectedRoute><ErrorBoundary><AppShell /></ErrorBoundary></ProtectedRoute>}>
                 <Route index element={<Navigate to="/dashboard" replace />} />
                 <Route path="dashboard" element={<DashboardRouter />} />
 
