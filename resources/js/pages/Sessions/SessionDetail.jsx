@@ -16,18 +16,19 @@ const SessionDetail = () => {
     const { data, isLoading } = useSession(ulid);
     const [showShare, setShowShare] = useState(false);
 
-    if (isLoading) return <LoadingSpinner />;
     const session = data?.data;
-    if (!session) return <ErrorBanner message="Session not found." />;
-
-    const startDate = new Date(session.started_at);
-    const endDate = session.ended_at ? new Date(session.ended_at) : null;
-    const photo = session.photos?.[0];
+    const photo = session?.photos?.[0];
 
     const photoUrl = useMemo(() => {
         if (!photo) return '';
         return photo.download_url || getPhotoDownloadUrl(ulid, photo.id);
     }, [photo, ulid]);
+
+    if (isLoading) return <LoadingSpinner />;
+    if (!session) return <ErrorBanner message="Session not found." />;
+
+    const startDate = new Date(session.started_at);
+    const endDate = session.ended_at ? new Date(session.ended_at) : null;
 
     return (
         <div className="max-w-lg mx-auto space-y-4">
