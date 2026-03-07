@@ -34,7 +34,8 @@ class ReportController extends Controller
         $sessionsQuery = MentoringSession::with(['mentor', 'participants.mentee', 'photos'])
             ->where('status', 'completed')
             ->where('mentor_id', $mentorId)
-            ->whereBetween(DB::raw('date(started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('ended_at')
+            ->whereBetween(DB::raw('date(ended_at)'), [$filters['start'], $filters['end']])
             ->orderBy('started_at', 'desc');
 
         $sessions = $sessionsQuery->get();
@@ -43,7 +44,8 @@ class ReportController extends Controller
             ->join('mentoring_sessions', 'mentoring_sessions.id', '=', 'session_participants.session_id')
             ->where('mentoring_sessions.status', 'completed')
             ->where('mentoring_sessions.mentor_id', $mentorId)
-            ->whereBetween(DB::raw('date(mentoring_sessions.started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('mentoring_sessions.ended_at')
+            ->whereBetween(DB::raw('date(mentoring_sessions.ended_at)'), [$filters['start'], $filters['end']])
             ->select('session_participants.mentee_id', DB::raw('COUNT(DISTINCT mentoring_sessions.id) as completed_sessions'))
             ->groupBy('session_participants.mentee_id')
             ->orderByDesc('completed_sessions')
@@ -76,7 +78,8 @@ class ReportController extends Controller
         $sessions = MentoringSession::with(['mentor', 'participants.mentee', 'photos'])
             ->where('status', 'completed')
             ->whereHas('participants', fn ($q) => $q->where('mentee_id', $user->id))
-            ->whereBetween(DB::raw('date(started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('ended_at')
+            ->whereBetween(DB::raw('date(ended_at)'), [$filters['start'], $filters['end']])
             ->orderBy('started_at', 'desc')
             ->get();
 
@@ -93,13 +96,15 @@ class ReportController extends Controller
 
         $sessions = MentoringSession::with(['mentor', 'participants.mentee', 'photos'])
             ->where('status', 'completed')
-            ->whereBetween(DB::raw('date(started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('ended_at')
+            ->whereBetween(DB::raw('date(ended_at)'), [$filters['start'], $filters['end']])
             ->orderBy('started_at', 'desc')
             ->get();
 
         $mentorSummaries = MentoringSession::query()
             ->where('status', 'completed')
-            ->whereBetween(DB::raw('date(started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('ended_at')
+            ->whereBetween(DB::raw('date(ended_at)'), [$filters['start'], $filters['end']])
             ->select('mentor_id', DB::raw('COUNT(*) as completed_sessions'))
             ->groupBy('mentor_id')
             ->orderByDesc('completed_sessions')
@@ -118,7 +123,8 @@ class ReportController extends Controller
         $mentorMenteeCounts = DB::table('session_participants')
             ->join('mentoring_sessions', 'mentoring_sessions.id', '=', 'session_participants.session_id')
             ->where('mentoring_sessions.status', 'completed')
-            ->whereBetween(DB::raw('date(mentoring_sessions.started_at)'), [$filters['start'], $filters['end']])
+            ->whereNotNull('mentoring_sessions.ended_at')
+            ->whereBetween(DB::raw('date(mentoring_sessions.ended_at)'), [$filters['start'], $filters['end']])
             ->select('mentoring_sessions.mentor_id', 'session_participants.mentee_id', DB::raw('COUNT(DISTINCT mentoring_sessions.id) as completed_sessions'))
             ->groupBy('mentoring_sessions.mentor_id', 'session_participants.mentee_id')
             ->orderByDesc('completed_sessions')

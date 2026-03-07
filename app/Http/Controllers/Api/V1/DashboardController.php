@@ -54,9 +54,11 @@ class DashboardController extends Controller
         return [
             'total_mentees' => $this->mentorMenteeRepo->getApprovedByMentor($user->id)->count(),
             'pending_mentees' => $this->mentorMenteeRepo->getPendingByMentor($user->id)->count(),
-            'upcoming_appointments' => Appointment::where('mentor_id', $user->id)
-                ->where('status', 'approved')
+            'upcoming_appointments' => Appointment::query()
+                ->where('mentor_id', $user->id)
                 ->where('scheduled_at', '>=', now())
+                ->whereNotIn('status', ['rejected', 'cancelled', 'completed'])
+                ->whereHas('mentees', fn ($q) => $q->whereIn('status', ['approved', 'accepted']))
                 ->count(),
             'completed_sessions' => MentoringSession::where('mentor_id', $user->id)
                 ->where('status', 'completed')
@@ -73,9 +75,13 @@ class DashboardController extends Controller
     private function menteeDashboard(User $user): array
     {
         return [
-            'upcoming_appointments' => Appointment::whereHas('mentees', fn ($q) => $q->where('mentee_id', $user->id))
-                ->where('status', 'approved')
+            'upcoming_appointments' => Appointment::query()
                 ->where('scheduled_at', '>=', now())
+                ->whereNotIn('status', ['rejected', 'cancelled', 'completed'])
+                ->whereHas('mentees', fn ($q) => $q
+                    ->where('mentee_id', $user->id)
+                    ->whereIn('status', ['approved', 'accepted'])
+                )
                 ->count(),
             'completed_sessions' => MentoringSession::whereHas('participants', fn ($q) => $q->where('mentee_id', $user->id))
                 ->where('status', 'completed')
