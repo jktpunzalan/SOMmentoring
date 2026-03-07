@@ -22,7 +22,9 @@ const MenteeDetail = () => {
 
     const now = Date.now();
     const upcoming = appointments.filter(a => a?.scheduled_at && new Date(a.scheduled_at).getTime() >= now);
-    const past = appointments.filter(a => a?.scheduled_at && new Date(a.scheduled_at).getTime() < now);
+    const completedSessions = appointments
+        .map(a => a?.session)
+        .filter(s => s && (s.status || '').toLowerCase() === 'completed');
 
     const cardClass = 'bg-white rounded-xl border border-gray-200 p-4';
 
@@ -93,32 +95,32 @@ const MenteeDetail = () => {
             </div>
 
             <div className={cardClass}>
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Past Appointments ({past.length})</h3>
-                {past.length === 0 ? (
-                    <div className="text-sm text-gray-500">No past appointments.</div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Completed Sessions ({completedSessions.length})</h3>
+                {completedSessions.length === 0 ? (
+                    <div className="text-sm text-gray-500">No completed sessions.</div>
                 ) : (
                     <div className="space-y-3">
-                        {past.map((a) => {
-                            const d = a.scheduled_at ? new Date(a.scheduled_at) : null;
+                        {completedSessions.map((s) => {
+                            const startDt = s.started_at ? new Date(s.started_at) : null;
+                            const endDt = s.ended_at ? new Date(s.ended_at) : null;
                             return (
                                 <button
-                                    key={a.ulid}
+                                    key={s.ulid}
                                     type="button"
-                                    onClick={() => navigate(`/appointments/${a.ulid}`)}
+                                    onClick={() => navigate(`/sessions/${s.ulid}`)}
                                     className="w-full text-left rounded-lg border border-gray-200 p-3 hover:bg-gray-50"
                                 >
                                     <div className="flex items-start justify-between gap-2">
                                         <div>
-                                            <div className="font-medium text-gray-900">{a.title}</div>
-                                            {d && (
+                                            <div className="font-medium text-gray-900">{s.title || `Session #${s.ulid?.slice(-6)}`}</div>
+                                            {(startDt || endDt) && (
                                                 <div className="mt-1 space-y-1 text-xs text-gray-600">
-                                                    <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-gray-400" />{d.toLocaleDateString()}</div>
-                                                    <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-gray-400" />{d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
-                                                    {a.venue && <div className="flex items-center gap-2"><MapPin className="w-3.5 h-3.5 text-gray-400" />{a.venue}</div>}
+                                                    {startDt && <div className="flex items-center gap-2"><Calendar className="w-3.5 h-3.5 text-gray-400" />{startDt.toLocaleDateString()}</div>}
+                                                    {endDt && <div className="flex items-center gap-2"><Clock className="w-3.5 h-3.5 text-gray-400" />Ended {endDt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>}
                                                 </div>
                                             )}
                                         </div>
-                                        <AppointmentStatusBadge status={a.display_status || a.status} />
+                                        <AppointmentStatusBadge status={s.status} />
                                     </div>
                                 </button>
                             );
