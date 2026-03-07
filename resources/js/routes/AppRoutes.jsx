@@ -24,6 +24,7 @@ import ProfilePage from '@/pages/Profile/ProfilePage';
 import NotificationsPage from '@/pages/Notifications/NotificationsPage';
 import UserManagement from '@/pages/Admin/UserManagement';
 import ErrorBoundary from '@/components/shared/ErrorBoundary';
+import ReportsRouter from '@/pages/Reports/ReportsRouter';
 
 const ProtectedRoute = ({ children, roles }) => {
     const { user, loading, isAuthenticated } = useAuth();
@@ -70,6 +71,8 @@ const AppRoutes = () => {
                 <Route path="sessions" element={<SessionList />} />
                 <Route path="sessions/:ulid" element={<SessionDetail />} />
                 <Route path="sessions/:ulid/active" element={<ProtectedRoute roles={['mentor']}><ActiveSession /></ProtectedRoute>} />
+
+                <Route path="reports" element={<ReportsRouter />} />
 
                 <Route path="notifications" element={<NotificationsPage />} />
                 <Route path="profile" element={<ProfilePage />} />

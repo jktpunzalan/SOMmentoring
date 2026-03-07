@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\MentorMenteeController;
 use App\Http\Controllers\Api\V1\MentoringSessionController;
 use App\Http\Controllers\Api\V1\NotificationController;
 use App\Http\Controllers\Api\V1\ProfileController;
+use App\Http\Controllers\Api\V1\ReportController;
 use App\Http\Controllers\Api\V1\SessionNoteController;
 use App\Http\Controllers\Api\V1\SessionParticipantController;
 use App\Http\Controllers\Api\V1\SessionPhotoController;
@@ -77,6 +78,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/mark-read', [NotificationController::class, 'markAllRead']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markRead']);
+
+    // Reports
+    Route::get('/reports/mentor', [ReportController::class, 'mentor'])->middleware('role:mentor,super_admin');
+    Route::get('/reports/admin', [ReportController::class, 'admin'])->middleware('role:super_admin');
+    Route::get('/reports/mentee', [ReportController::class, 'mentee'])->middleware('role:mentee');
 
     // Profile
     Route::get('/profile', [ProfileController::class, 'show']);

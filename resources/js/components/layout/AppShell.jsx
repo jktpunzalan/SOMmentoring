@@ -3,7 +3,7 @@ import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import TopBar from './TopBar';
 import BottomNav from './BottomNav';
-import { LayoutDashboard, Calendar, BookOpen, Users, Bell, User, Settings, LogOut, X } from 'lucide-react';
+import { LayoutDashboard, Calendar, BookOpen, Users, Bell, User, Settings, LogOut, X, BarChart3 } from 'lucide-react';
 
 const AppShell = () => {
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -29,6 +29,7 @@ const AppShell = () => {
         if (path.includes('/appointments')) return 'Appointments';
         if (path.includes('/sessions') && path.includes('/active')) return 'Active Session';
         if (path.includes('/sessions')) return 'Sessions';
+        if (path.includes('/reports')) return 'Reports';
         if (path.includes('/profile')) return 'Profile';
         if (path.includes('/admin')) return 'Admin';
         return 'Mentoring';
@@ -39,6 +40,7 @@ const AppShell = () => {
         { to: '/appointments/calendar', icon: Calendar, label: 'Calendar', show: true },
         { to: '/appointments', icon: Calendar, label: 'Appointments', show: true },
         { to: '/sessions', icon: BookOpen, label: 'Sessions', show: true },
+        { to: '/reports', icon: BarChart3, label: 'Reports', show: true },
         { to: '/mentees', icon: Users, label: 'Mentees', show: isMentor || isSuperAdmin },
         { to: '/profile', icon: User, label: 'Profile', show: true },
         { to: '/admin/users', icon: Settings, label: 'User Management', show: isSuperAdmin },

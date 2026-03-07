@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSessions';
 import { useAuth } from '@/hooks/useAuth';
@@ -6,13 +6,15 @@ import SessionNotesForm from '@/components/sessions/SessionNotesForm';
 import AppointmentStatusBadge from '@/components/appointments/AppointmentStatusBadge';
 import LoadingSpinner from '@/components/shared/LoadingSpinner';
 import ErrorBanner from '@/components/shared/ErrorBanner';
-import { Calendar, Clock, Users, Image, Download } from 'lucide-react';
+import ShareSessionDialog from '@/components/sessions/ShareSessionDialog';
+import { Calendar, Clock, Users, Image, Download, Share2 } from 'lucide-react';
 import { getPhotoDownloadUrl } from '@/services/sessionPhotoApi';
 
 const SessionDetail = () => {
     const { ulid } = useParams();
     const { user } = useAuth();
     const { data, isLoading } = useSession(ulid);
+    const [showShare, setShowShare] = useState(false);
 
     if (isLoading) return <LoadingSpinner />;
     const session = data?.data;
@@ -21,6 +23,11 @@ const SessionDetail = () => {
     const startDate = new Date(session.started_at);
     const endDate = session.ended_at ? new Date(session.ended_at) : null;
     const photo = session.photos?.[0];
+
+    const photoUrl = useMemo(() => {
+        if (!photo) return '';
+        return photo.download_url || getPhotoDownloadUrl(ulid, photo.id);
+    }, [photo, ulid]);
 
     return (
         <div className="max-w-lg mx-auto space-y-4">
@@ -70,14 +77,32 @@ const SessionDetail = () => {
                             <Image className="w-4 h-4 text-gray-400" />
                             <h3 className="text-sm font-medium text-gray-700">Session Photo</h3>
                         </div>
-                        <a href={getPhotoDownloadUrl(ulid, photo.id)} download className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg hover:bg-indigo-100 min-h-[36px]">
-                            <Download className="w-3.5 h-3.5" /> Download
-                        </a>
+                        <div className="flex items-center gap-2">
+                            {session.status === 'completed' && (
+                                <button
+                                    type="button"
+                                    onClick={() => setShowShare(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-lg hover:bg-emerald-100 min-h-[36px]"
+                                >
+                                    <Share2 className="w-3.5 h-3.5" /> Share
+                                </button>
+                            )}
+                            <a href={getPhotoDownloadUrl(ulid, photo.id)} download className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-50 text-indigo-600 text-xs font-medium rounded-lg hover:bg-indigo-100 min-h-[36px]">
+                                <Download className="w-3.5 h-3.5" /> Download
+                            </a>
+                        </div>
                     </div>
                     <img src={getPhotoDownloadUrl(ulid, photo.id)} alt="Session photo" className="w-full rounded-lg object-cover max-h-[400px]" />
                     <p className="text-xs text-gray-400 mt-2">Captured: {new Date(photo.captured_at).toLocaleString()}</p>
                 </div>
             )}
+
+            <ShareSessionDialog
+                isOpen={showShare}
+                onClose={() => setShowShare(false)}
+                session={session}
+                photoUrl={photoUrl}
+            />
 
             <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <h3 className="text-sm font-medium text-gray-700 mb-4">Session Notes</h3>
