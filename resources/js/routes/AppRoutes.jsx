@@ -12,6 +12,7 @@ import MenteeDashboard from '@/pages/Dashboard/MenteeDashboard';
 import AdminDashboard from '@/pages/Dashboard/AdminDashboard';
 import MenteeList from '@/pages/Mentees/MenteeList';
 import MenteeApproval from '@/pages/Mentees/MenteeApproval';
+import MenteeDetail from '@/pages/Mentees/MenteeDetail';
 import AppointmentList from '@/pages/Appointments/AppointmentList';
 import AppointmentForm from '@/pages/Appointments/AppointmentForm';
 import AppointmentDetail from '@/pages/Appointments/AppointmentDetail';
@@ -58,6 +59,7 @@ const AppRoutes = () => {
                 <Route path="dashboard" element={<DashboardRouter />} />
 
                 <Route path="mentees" element={<ProtectedRoute roles={['mentor', 'super_admin']}><MenteeList /></ProtectedRoute>} />
+                <Route path="mentees/:userId" element={<ProtectedRoute roles={['mentor', 'super_admin']}><MenteeDetail /></ProtectedRoute>} />
                 <Route path="mentees/pending" element={<ProtectedRoute roles={['mentor', 'super_admin']}><MenteeApproval /></ProtectedRoute>} />
 
                 <Route path="appointments" element={<AppointmentList />} />

@@ -10,6 +10,11 @@ export const getPendingMentees = async () => {
     return response.data;
 };
 
+export const getMenteeDetail = async (id) => {
+    const response = await api.get(`/mentees/${id}`);
+    return response.data;
+};
+
 export const approveMentee = async (id) => {
     const response = await api.post(`/mentees/${id}/approve`);
     return response.data;

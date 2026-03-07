@@ -32,6 +32,15 @@ class AppointmentRepository
         return $query->orderBy('scheduled_at', 'desc')->paginate($filters['per_page'] ?? 15);
     }
 
+    public function getByMentorAndMentee(int $mentorId, int $menteeId): Collection
+    {
+        return Appointment::with(['mentor', 'proposedBy', 'mentees.mentee', 'session'])
+            ->where('mentor_id', $mentorId)
+            ->whereHas('mentees', fn ($q) => $q->where('mentee_id', $menteeId))
+            ->orderBy('scheduled_at', 'desc')
+            ->get();
+    }
+
     public function getByMentee(int $menteeId, array $filters = []): LengthAwarePaginator
     {
         $query = Appointment::with(['mentor', 'proposedBy'])

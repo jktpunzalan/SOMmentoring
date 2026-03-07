@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\MentorMenteeResource;
+use App\Http\Resources\UserResource;
 use App\Services\MentorMenteeService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -22,6 +24,19 @@ class MentorMenteeController extends Controller
     {
         $pending = $this->service->getPendingByMentor($request->user()->id);
         return response()->json(MentorMenteeResource::collection($pending)->response()->getData(true));
+    }
+
+    public function show(Request $request, int $id): JsonResponse
+    {
+        $result = $this->service->getMenteeDetail($id, $request->user());
+
+        return response()->json([
+            'data' => [
+                'mentee' => $result['record']->mentee ? new UserResource($result['record']->mentee) : null,
+                'record' => new MentorMenteeResource($result['record']),
+                'appointments' => AppointmentResource::collection($result['appointments']),
+            ],
+        ]);
     }
 
     public function approve(Request $request, int $id): JsonResponse

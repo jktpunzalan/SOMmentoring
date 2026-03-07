@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import {
     useAppointment, useUpdateAppointment, useEnrollAppointment,
@@ -200,7 +200,13 @@ const AppointmentDetail = () => {
                         {appointment.mentees.map((m) => (
                             <div key={m.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
                                 <div>
-                                    <p className="text-sm font-medium text-gray-900">{m.mentee?.name || `Mentee #${m.mentee_id}`}</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => navigate(`/mentees/${m.mentee_id}`)}
+                                        className="text-sm font-medium text-gray-900 hover:underline text-left"
+                                    >
+                                        {m.mentee?.name || `Mentee #${m.mentee_id}`}
+                                    </button>
                                     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium ${menteeStatusBadge[m.status] || 'bg-gray-100 text-gray-700'}`}>
                                         {m.status}
                                     </span>

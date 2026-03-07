@@ -15,6 +15,14 @@ export const usePendingMentees = () => {
     });
 };
 
+export const useMenteeDetail = (id) => {
+    return useQuery({
+        queryKey: ['mentees', 'detail', id],
+        queryFn: () => menteeApi.getMenteeDetail(id),
+        enabled: !!id,
+    });
+};
+
 export const useApproveMentee = () => {
     const queryClient = useQueryClient();
     return useMutation({

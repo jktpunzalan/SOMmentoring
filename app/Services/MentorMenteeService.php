@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\MentorMentee;
 use App\Models\User;
+use App\Repositories\AppointmentRepository;
 use App\Repositories\MentorMenteeRepository;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 class MentorMenteeService
 {
     public function __construct(
+        private AppointmentRepository $appointmentRepository,
         private MentorMenteeRepository $mentorMenteeRepository,
         private NotificationService $notificationService,
     ) {}
@@ -23,6 +25,22 @@ class MentorMenteeService
     public function getPendingByMentor(int $mentorId): Collection
     {
         return $this->mentorMenteeRepository->getPendingByMentor($mentorId);
+    }
+
+    public function getMenteeDetail(int $menteeId, User $viewer): array
+    {
+        $record = $this->mentorMenteeRepository->findByMenteeId($menteeId);
+        abort_if(!$record, 404, 'Mentor-mentee record not found.');
+
+        abort_if($record->mentor_id !== $viewer->id && !$viewer->isSuperAdmin(), 403, 'Unauthorized.');
+
+        $mentorId = $viewer->isSuperAdmin() ? $record->mentor_id : $viewer->id;
+        $appointments = $this->appointmentRepository->getByMentorAndMentee($mentorId, $menteeId);
+
+        return [
+            'record' => $record->load(['mentor', 'mentee']),
+            'appointments' => $appointments,
+        ];
     }
 
     public function approve(int $menteeId, User $mentor): MentorMentee

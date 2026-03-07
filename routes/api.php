@@ -31,6 +31,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:mentor,super_admin')->group(function () {
         Route::get('/mentees', [MentorMenteeController::class, 'index']);
         Route::get('/mentees/pending', [MentorMenteeController::class, 'pending']);
+        Route::get('/mentees/{id}', [MentorMenteeController::class, 'show'])->whereNumber('id');
         Route::post('/mentees/{id}/approve', [MentorMenteeController::class, 'approve']);
         Route::post('/mentees/{id}/reject', [MentorMenteeController::class, 'reject']);
     });
