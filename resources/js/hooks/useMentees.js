@@ -23,6 +23,20 @@ export const useMenteeDetail = (id) => {
     });
 };
 
+export const useAdminMentees = (filters) => {
+    return useQuery({
+        queryKey: ['admin', 'mentees', filters],
+        queryFn: () => menteeApi.adminGetMentees(filters),
+    });
+};
+
+export const useAdminMentors = () => {
+    return useQuery({
+        queryKey: ['admin', 'mentors'],
+        queryFn: menteeApi.adminGetMentors,
+    });
+};
+
 export const useApproveMentee = () => {
     const queryClient = useQueryClient();
     return useMutation({

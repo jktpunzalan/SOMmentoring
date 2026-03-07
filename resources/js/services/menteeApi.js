@@ -15,6 +15,16 @@ export const getMenteeDetail = async (id) => {
     return response.data;
 };
 
+export const adminGetMentees = async (params = {}) => {
+    const response = await api.get('/admin/mentees', { params });
+    return response.data;
+};
+
+export const adminGetMentors = async () => {
+    const response = await api.get('/admin/mentors');
+    return response.data;
+};
+
 export const approveMentee = async (id) => {
     const response = await api.post(`/mentees/${id}/approve`);
     return response.data;

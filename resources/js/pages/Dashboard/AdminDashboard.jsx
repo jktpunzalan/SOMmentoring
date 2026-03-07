@@ -33,7 +33,7 @@ const AdminDashboard = () => {
                     </ClickableCard>
                 ))}
             </div>
-            <ClickableCard to="/admin/users" className="w-full bg-indigo-600 text-white p-4 flex items-center justify-center gap-3 hover:bg-indigo-700 min-h-[56px]" ariaLabel="Manage Users">
+            <ClickableCard to="/admin/users" className="w-full bg-white border border-gray-200 text-gray-900 p-4 flex items-center justify-center gap-3 hover:bg-gray-50 min-h-[56px]" ariaLabel="Manage Users">
                 <Settings className="w-5 h-5" />
                 <span className="font-medium">Manage Users</span>
             </ClickableCard>

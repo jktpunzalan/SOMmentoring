@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\V1\AppointmentController;
+use App\Http\Controllers\Api\V1\AdminMenteeController;
+use App\Http\Controllers\Api\V1\AdminMentorController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\DashboardController;
 use App\Http\Controllers\Api\V1\MentorMenteeController;
@@ -97,5 +99,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/users/{id}', [UserController::class, 'update']);
         Route::delete('/users/{id}', [UserController::class, 'destroy']);
         Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword']);
+
+        Route::get('/admin/mentees', [AdminMenteeController::class, 'index']);
+        Route::get('/admin/mentors', [AdminMentorController::class, 'index']);
     });
 });
