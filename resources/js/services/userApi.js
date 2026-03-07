@@ -32,9 +32,11 @@ export const getProfile = async () => {
 
 export const updateProfile = async (data) => {
     const isFormData = data instanceof FormData;
-    const response = await api.put('/profile', data, {
-        headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {},
-    });
+    const request = isFormData
+        ? api.post('/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } })
+        : api.put('/profile', data);
+
+    const response = await request;
     return response.data;
 };
 
