@@ -38,6 +38,17 @@ const MenteeList = () => {
             ? data.data.data
             : [];
 
+    const uniqueMentees = useMemo(() => {
+        const map = new Map();
+        for (const m of mentees) {
+            const menteeObj = m?.mentee?.data || m?.mentee;
+            const key = menteeObj?.id ?? m?.mentee_id ?? m?.id;
+            if (key === undefined || key === null) continue;
+            if (!map.has(key)) map.set(key, m);
+        }
+        return Array.from(map.values());
+    }, [mentees]);
+
     const filter = (searchParams.get('filter') || '').toLowerCase();
     useEffect(() => {
         if (filter === 'pending') {
@@ -47,8 +58,8 @@ const MenteeList = () => {
 
     if (isLoading) return <LoadingSpinner />;
 
-    const approved = mentees.filter(m => m.status === 'approved');
-    const pending = mentees.filter(m => m.status === 'pending');
+    const approved = uniqueMentees.filter(m => m.status === 'approved');
+    const pending = uniqueMentees.filter(m => m.status === 'pending');
 
     const invalidShape = !error && data && !Array.isArray(data?.data) && !Array.isArray(data?.data?.data);
 
