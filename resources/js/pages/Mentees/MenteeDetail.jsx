@@ -16,15 +16,14 @@ const MenteeDetail = () => {
     const payload = data?.data;
     const mentee = payload?.mentee?.data || payload?.mentee;
     const appointments = payload?.appointments?.data || payload?.appointments || [];
+    const sessions = payload?.sessions?.data || payload?.sessions || [];
 
     if (error) return <ErrorBanner message="Failed to load mentee details." />;
     if (!mentee) return <ErrorBanner message="Mentee not found." />;
 
     const now = Date.now();
     const upcoming = appointments.filter(a => a?.scheduled_at && new Date(a.scheduled_at).getTime() >= now);
-    const completedSessions = appointments
-        .map(a => a?.session)
-        .filter(s => s && (s.status || '').toLowerCase() === 'completed');
+    const completedSessions = sessions.filter(s => (s?.status || '').toLowerCase() === 'completed');
 
     const cardClass = 'bg-white rounded-xl border border-gray-200 p-4';
 

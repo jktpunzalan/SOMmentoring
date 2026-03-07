@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\MentorMentee;
+use App\Models\MentoringSession;
 use App\Models\User;
 use App\Repositories\AppointmentRepository;
 use App\Repositories\MentorMenteeRepository;
@@ -37,9 +38,17 @@ class MentorMenteeService
         $mentorId = $viewer->isSuperAdmin() ? $record->mentor_id : $viewer->id;
         $appointments = $this->appointmentRepository->getByMentorAndMentee($mentorId, $menteeId);
 
+        $sessions = MentoringSession::with(['mentor', 'participants.mentee', 'photos'])
+            ->where('mentor_id', $mentorId)
+            ->where('status', 'completed')
+            ->whereHas('participants', fn ($q) => $q->where('mentee_id', $menteeId))
+            ->orderBy('started_at', 'desc')
+            ->get();
+
         return [
             'record' => $record->load(['mentor', 'mentee']),
             'appointments' => $appointments,
+            'sessions' => $sessions,
         ];
     }
 

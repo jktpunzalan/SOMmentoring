@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\AppointmentResource;
 use App\Http\Resources\MentorMenteeResource;
+use App\Http\Resources\MentoringSessionReportResource;
 use App\Http\Resources\UserResource;
 use App\Services\MentorMenteeService;
 use Illuminate\Http\JsonResponse;
@@ -35,6 +36,7 @@ class MentorMenteeController extends Controller
                 'mentee' => $result['record']->mentee ? new UserResource($result['record']->mentee) : null,
                 'record' => new MentorMenteeResource($result['record']),
                 'appointments' => AppointmentResource::collection($result['appointments']),
+                'sessions' => MentoringSessionReportResource::collection($result['sessions']),
             ],
         ]);
     }
