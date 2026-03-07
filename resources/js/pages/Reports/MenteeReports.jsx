@@ -15,7 +15,7 @@ const MenteeReports = () => {
     const params = useMemo(() => (start && end ? { start, end } : null), [start, end]);
     const { data, isLoading, error } = useMenteeReport(params || {});
 
-    const sessions = data?.data?.sessions?.data || [];
+    const sessions = data?.data?.sessions?.data || data?.data?.sessions || [];
     const exportBaseName = start && end ? `mentee-report_${start}_to_${end}` : 'mentee-report';
 
     const exportCsv = () => {

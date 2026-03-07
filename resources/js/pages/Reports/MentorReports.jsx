@@ -16,7 +16,7 @@ const MentorReports = () => {
     const { data, isLoading, error } = useMentorReport(params || {});
 
     const payload = data?.data;
-    const sessions = payload?.sessions?.data || [];
+    const sessions = payload?.sessions?.data || payload?.sessions || [];
     const menteeCounts = payload?.mentee_counts || [];
 
     const exportBaseName = start && end ? `mentor-report_${start}_to_${end}` : 'mentor-report';

@@ -16,7 +16,7 @@ const AdminReports = () => {
     const { data, isLoading, error } = useAdminReport(params || {});
 
     const payload = data?.data;
-    const sessions = payload?.sessions?.data || [];
+    const sessions = payload?.sessions?.data || payload?.sessions || [];
     const mentorSummaries = payload?.mentor_summaries || [];
     const mentorMenteeCounts = payload?.mentor_mentee_counts || [];
 
