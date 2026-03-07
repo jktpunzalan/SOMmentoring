@@ -11,12 +11,18 @@ const MenteeList = () => {
     const { data, isLoading, error } = useMentees();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const mentees = data?.data || [];
+    const mentees = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.data?.data)
+            ? data.data.data
+            : [];
 
     if (isLoading) return <LoadingSpinner />;
 
     const approved = mentees.filter(m => m.status === 'approved');
     const pending = mentees.filter(m => m.status === 'pending');
+
+    const invalidShape = !error && data && !Array.isArray(data?.data) && !Array.isArray(data?.data?.data);
 
     const filter = (searchParams.get('filter') || '').toLowerCase();
     useEffect(() => {
@@ -32,6 +38,7 @@ const MenteeList = () => {
     return (
         <div className="space-y-6">
             {error && <ErrorBanner message="Failed to load mentees." />}
+            {invalidShape && <ErrorBanner message="Unexpected response format while loading mentees." />}
             {pending.length > 0 && (
                 <button onClick={() => navigate('/mentees/pending')} className="w-full bg-yellow-50 border border-yellow-200 rounded-xl p-4 flex items-center gap-3 hover:bg-yellow-100 transition-colors">
                     <UserPlus className="w-5 h-5 text-yellow-600" />
