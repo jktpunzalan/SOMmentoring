@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Appointment;
+use App\Models\AppointmentMentee;
 use App\Models\MentorMentee;
 use App\Models\MentoringSession;
 use App\Models\User;
@@ -86,6 +87,32 @@ class SessionTest extends TestCase
 
         $response->assertOk()
             ->assertJsonPath('data.status', 'completed');
+    }
+
+    public function test_mentor_can_start_session_from_appointment_with_confirmed_mentee_even_if_appointment_status_is_not_approved(): void
+    {
+        [$mentor, $mentee] = $this->createMentorMenteePair();
+
+        $appointment = Appointment::factory()->create([
+            'mentor_id' => $mentor->id,
+            'proposed_by_id' => $mentee->id,
+            'status' => 'open',
+        ]);
+
+        AppointmentMentee::create([
+            'appointment_id' => $appointment->id,
+            'mentee_id' => $mentee->id,
+            'status' => 'approved',
+        ]);
+
+        $response = $this->actingAs($mentor)->postJson('/api/v1/sessions', [
+            'title' => 'Session From Appointment',
+            'appointment_id' => $appointment->id,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.appointment_id', $appointment->id)
+            ->assertJsonPath('data.status', 'ongoing');
     }
 
     public function test_user_can_list_sessions(): void

@@ -51,8 +51,17 @@ class MentoringSessionService
         if (!empty($data['appointment_id'])) {
             $appointment = $this->appointmentRepository->findById($data['appointment_id']);
             abort_if(!$appointment, 404, 'Appointment not found.');
-            abort_if($appointment->status !== 'approved', 422, 'Appointment must be approved to start a session.');
             abort_if($appointment->mentor_id !== $mentor->id, 403, 'This appointment belongs to another mentor.');
+
+            $hasConfirmedMentee = $appointment->mentees
+                ->whereIn('status', ['approved', 'accepted'])
+                ->isNotEmpty();
+
+            abort_if(
+                !$hasConfirmedMentee,
+                422,
+                'Appointment must have at least one confirmed mentee to start a session.'
+            );
         }
 
         return DB::transaction(function () use ($data, $mentor) {
@@ -68,7 +77,10 @@ class MentoringSessionService
 
             if (!empty($data['appointment_id']) && empty($menteeIds)) {
                 $appointment = $this->appointmentRepository->findById($data['appointment_id']);
-                $menteeIds = $appointment->mentees->pluck('mentee_id')->toArray();
+                $menteeIds = $appointment->mentees
+                    ->whereIn('status', ['approved', 'accepted'])
+                    ->pluck('mentee_id')
+                    ->toArray();
             }
 
             foreach ($menteeIds as $menteeId) {
