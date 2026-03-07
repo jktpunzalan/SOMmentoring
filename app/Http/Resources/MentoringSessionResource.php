@@ -18,7 +18,10 @@ class MentoringSessionResource extends JsonResource
             'started_at' => $this->started_at?->toISOString(),
             'ended_at' => $this->ended_at?->toISOString(),
             'status' => $this->status,
-            'notes' => new SessionNoteResource($this->whenLoaded('notes')),
+            'notes' => $this->when(
+                !$request->user()?->isSuperAdmin(),
+                fn () => new SessionNoteResource($this->whenLoaded('notes'))
+            ),
             'participants' => SessionParticipantResource::collection($this->whenLoaded('participants')),
             'photos' => SessionPhotoResource::collection($this->whenLoaded('photos')),
             'appointment' => new AppointmentResource($this->whenLoaded('appointment')),
