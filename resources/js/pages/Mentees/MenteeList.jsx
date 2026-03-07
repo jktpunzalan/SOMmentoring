@@ -17,19 +17,19 @@ const MenteeList = () => {
             ? data.data.data
             : [];
 
-    if (isLoading) return <LoadingSpinner />;
-
-    const approved = mentees.filter(m => m.status === 'approved');
-    const pending = mentees.filter(m => m.status === 'pending');
-
-    const invalidShape = !error && data && !Array.isArray(data?.data) && !Array.isArray(data?.data?.data);
-
     const filter = (searchParams.get('filter') || '').toLowerCase();
     useEffect(() => {
         if (filter === 'pending') {
             navigate('/mentees/pending', { replace: true });
         }
     }, [filter, navigate]);
+
+    if (isLoading) return <LoadingSpinner />;
+
+    const approved = mentees.filter(m => m.status === 'approved');
+    const pending = mentees.filter(m => m.status === 'pending');
+
+    const invalidShape = !error && data && !Array.isArray(data?.data) && !Array.isArray(data?.data?.data);
 
     if (filter === 'pending') return null;
 
